@@ -13,7 +13,7 @@ case "${1:-}" in
     *) echo 'Usage: sh install-gui-save.sh [--trial]' >&2; exit 1;;
 esac
 findmnt -n -o OPTIONS / | tr ',' '\n' | grep -qx rw
-src=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+src=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 # Restrict discovery to this pinned bundle; refuse ambiguous frontend paths.
 python3 - "$src" <<'PY'
 import shutil
@@ -33,11 +33,11 @@ if marker not in text:
     if not backup.exists():
         shutil.copy2(index, backup)
     index.write_text(text.replace('</body>', marker + '</body>'))
-shutil.copyfile(Path(sys.argv[1]) / 'dsp-save-button.js', index.parent / 'dsp-save-button.js')
+shutil.copyfile(Path(sys.argv[1]) / 'web' / 'dsp-save-button.js', index.parent / 'dsp-save-button.js')
 print('Save button installed in', index)
 PY
-install -m 755 "$src/dsp-save-web.py" /opt/camilla/bin/dsp-save-web.py
-install -m 644 "$src/dsp-save-web.service" /etc/systemd/system/dsp-save-web.service
+install -m 755 "$src/src/dsp-save-web.py" /opt/camilla/bin/dsp-save-web.py
+install -m 644 "$src/systemd/dsp-save-web.service" /etc/systemd/system/dsp-save-web.service
 systemctl daemon-reload
 systemctl enable --now dsp-save-web.service
 echo 'Installed. Refresh CamillaGUI. Port 5006 must be reachable only on the trusted LAN, like port 5005.'

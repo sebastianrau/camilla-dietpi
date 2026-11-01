@@ -12,7 +12,7 @@ for service in camilladsp camillagui; do
         exit 1
     fi
 done
-src=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
+src=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 apt update
 apt install --no-install-recommends -y \
     alsa-utils libasound2t64 curl ca-certificates tar python3 python3-yaml \
@@ -34,19 +34,19 @@ printf '%s\n' '86fd3cde575038f312ede7bad0910dc5e46b974cafc048c26115ec3cb9f54792 
 tar -xzf bundle_linux_amd64.tar.gz -C /opt/camilla/gui
 /opt/camilla/bin/camilladsp --version
 /opt/camilla/gui/camillagui_backend/camillagui_backend --help
-install -m 755 "$src/dsp-state" /usr/local/sbin/dsp-state
-install -m 755 "$src/configure-dsp.py" /usr/local/sbin/configure-dsp
-install -m 755 "$src/run-dsp" /opt/camilla/bin/run-dsp
+install -m 755 "$src/src/dsp-state" /usr/local/sbin/dsp-state
+install -m 755 "$src/src/configure-dsp.py" /usr/local/sbin/configure-dsp
+install -m 755 "$src/src/run-dsp" /opt/camilla/bin/run-dsp
 cat > /usr/local/sbin/dsp-save <<'EOF'
 #!/bin/sh
 exec /usr/local/sbin/dsp-state save
 EOF
 chmod 755 /usr/local/sbin/dsp-save
 for unit in dsp-settings.service camilladsp.service camillagui.service; do
-    install -m 644 "$src/$unit" "/etc/systemd/system/$unit"
+    install -m 644 "$src/systemd/$unit" "/etc/systemd/system/$unit"
 done
 if [ ! -f /etc/camilladsp/gui.yml ]; then
-    install -m 644 "$src/gui.yml" /etc/camilladsp/gui.yml
+    install -m 644 "$src/config/gui.yml" /etc/camilladsp/gui.yml
 fi
 printf '%s\n' snd-usb-audio > /etc/modules-load.d/camilladsp.conf
 modprobe snd-usb-audio

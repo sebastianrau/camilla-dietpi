@@ -48,7 +48,7 @@ printf 'BUSYBOX=y\n' > /etc/initramfs-tools/conf.d/dsp-busybox
 grep -qxF overlay /etc/initramfs-tools/modules || printf '\noverlay\n' >> /etc/initramfs-tools/modules
 printf 'overlayroot="tmpfs:swap=0,recurse=0"\n' > /etc/overlayroot.local.conf
 mkdir -p /etc/systemd/system/systemd-remount-fs.service.d
-install -m 644 "$(dirname "$0")/overlay-remount.conf" /etc/systemd/system/systemd-remount-fs.service.d/overlay.conf
+install -m 644 "$(dirname "$0")/../systemd/overlay-remount.conf" /etc/systemd/system/systemd-remount-fs.service.d/overlay.conf
 # Use Debian's current-kernel links so maintenance follows kernel updates.
 [ -e /vmlinuz ] && [ -e /initrd.img ] || { echo 'Missing kernel symlinks; inspect before creating maintenance entry.' >&2; exit 1; }
 ROOT_UUID=$(findmnt -n -o UUID /)

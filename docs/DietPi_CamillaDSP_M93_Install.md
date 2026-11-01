@@ -29,9 +29,9 @@ The helper scripts have local software tests. The release checksums, GUI command
 
 ### Files and terminology
 
-Download both this guide and `DietPi_DSP_Setup.zip` to your Mac. The ZIP contains:
+Download this guide and the matching `DietPi_DSP_Setup.zip` to your Mac. In the repository the ZIP is under `dist/`; standalone downloads may be copied from their actual download location. Preserve the folders when extracting the ZIP. The ZIP contains:
 
-| File | Purpose |
+| File (inside its source folder) | Purpose |
 |---|---|
 | `install-files.sh` | Installs required packages, verified release binaries, helper files and units; does not partition or activate protection |
 | `configure-dsp.py` | Prompts for actual ALSA card, stream parameters and clock selector; creates initial config |
@@ -148,7 +148,7 @@ Required: the correct **separate ext4 filesystem**, `ro`. It deliberately has no
 On your Mac, from the folder where you downloaded the ZIP:
 
 ```sh
-scp -O DietPi_DSP_Setup.zip admin@YOUR_DSP_IP:/home/admin/
+scp -O dist/DietPi_DSP_Setup.zip admin@YOUR_DSP_IP:/home/admin/
 ```
 
 `-O` selects legacy SCP so this does not depend on a separate SFTP server in Dropbear. Use your real address in place of `YOUR_DSP_IP`.
@@ -160,8 +160,8 @@ mkdir -p /root/dietpi-dsp
 unzip /home/admin/DietPi_DSP_Setup.zip -d /root/dietpi-dsp
 cd /root/dietpi-dsp
 sha256sum -c SHA256SUMS
-less install-files.sh
-sh ./install-files.sh
+less scripts/install-files.sh
+sh scripts/install-files.sh
 ```
 
 All internal hashes must pass. The script installs the pinned DSP/GUI releases after checking their published hashes; it installs ALSA, Python YAML and required runtime/admin packages; it creates the `dsp` account; it copies the scripts and service units to their final locations. It **does not start services, partition disks, erase settings or enable the root overlay**.
@@ -354,7 +354,7 @@ Run from the extracted bundle in a real, writable root boot (not an overlay):
 
 ```sh
 cd /root/dietpi-dsp
-sh ./configure-protection.sh
+sh scripts/configure-protection.sh
 ```
 
 The helper does not reboot. It checks the boot stack, installs BusyBox/overlayroot, explicitly enables BusyBox in the initramfs, and includes the overlay module. On this M93, the original initramfs lacked `grep`; overlayroot consequently reported no driver even though the module was present.
@@ -438,14 +438,14 @@ The setup bundle includes `install-gui-save.sh`, `dsp-save-button.js`, `dsp-save
 For an optional protected-mode trial, extract the current ZIP and run as root:
 
 ```sh
-sh ./install-gui-save.sh --trial
+sh scripts/install-gui-save.sh --trial
 ```
 
 For permanent installation, boot **DietPi maintenance - writable OS**, enter a root shell, and confirm `/` is real ext4 `rw`. Transfer/extract the current ZIP again after entering maintenance: files copied into the previous RAM overlay do not survive reboot. From the extracted current bundle, run:
 
 ```sh
 cd /root/dietpi-dsp
-sh ./install-gui-save.sh
+sh scripts/install-gui-save.sh
 ```
 
 The installer checks for exactly one frontend `build/index.html`, backs it up, inserts an external script, and enables a separate fixed-action save service. It does not run a save. If frontend discovery fails, inspect the installed bundle rather than guessing a path. Reboot normally, check protected mounts, and refresh the browser (hard refresh if needed).

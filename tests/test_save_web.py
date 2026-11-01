@@ -8,7 +8,7 @@ from http.client import HTTPConnection
 from unittest.mock import patch
 from http.server import ThreadingHTTPServer
 
-spec = importlib.util.spec_from_file_location('save_web', Path(__file__).with_name('dsp-save-web.py'))
+spec = importlib.util.spec_from_file_location('save_web', (Path(__file__).resolve().parents[1] / 'src' / 'dsp-save-web.py'))
 m = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(m)
 

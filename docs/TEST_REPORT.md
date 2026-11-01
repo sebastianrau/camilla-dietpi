@@ -24,7 +24,7 @@ Original revision-2 tests did not exercise hardware. On 1 November 2026 the user
 After the install script has supplied python3 and python3-yaml, from the extracted setup folder:
 
 ```sh
-python3 -m unittest discover -p 'test_*.py'
+python3 -m unittest discover -s tests -p 'test_*.py'
 ```
 
 The tests do not partition disks or invoke real mount/systemctl mutations. They must still be run as ordinary local software tests rather than treated as proof of appliance commissioning.
@@ -39,3 +39,9 @@ The tests do not partition disks or invoke real mount/systemctl mutations. They 
 ## GUI permanent-save extension
 
 Two local tests pass: concurrent saves are rejected and command failures reach status; a real loopback HTTP server rejects missing/foreign browser origins and arbitrary command parameters, and accepts the fixed save action. The actual privileged save command is mocked in these tests. Shell/Python syntax is checked. Appliance trial subsequently verified at reserved IP 192.168.192.50: frontend path `_internal/build/index.html`, injected script served through the GUI, status endpoint reported successful snapshot `dsp-20261101-183504-ed93b920.tar.gz` and read-only config volume. User confirmed button operation. Persistent installation and survival of the button across reboot remain pending.
+
+## Repository restructuring verification — 1 November 2026
+
+Sources now live under `src/`, installers under `scripts/`, units under `systemd/`, configuration under `config/`, browser assets under `web/`, and documentation under `docs/`. Tests resolve sources relative to the repository root.
+
+All 14 local tests pass with PyYAML 6.0.3 in an isolated environment, including snapshot/descriptor tests, HTTP origin checks, and deterministic bundle construction with complete checksum coverage. Shell syntax checks pass for all shell installers and the runtime wrapper. `tools/build_bundle.py` rebuilds the ZIP under `dist/` and its root manifest. These checks do not execute privileged installers on the appliance.

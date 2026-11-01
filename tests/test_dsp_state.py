@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 import yaml
 
-loader = importlib.machinery.SourceFileLoader('dspstate', str(Path(__file__).with_name('dsp-state')))
+loader = importlib.machinery.SourceFileLoader('dspstate', str((Path(__file__).resolve().parents[1] / 'src' / 'dsp-state')))
 spec = importlib.util.spec_from_loader(loader.name, loader)
 m = importlib.util.module_from_spec(spec)
 loader.exec_module(m)
