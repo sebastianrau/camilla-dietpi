@@ -14,12 +14,12 @@ The current appliance is already installed at **192.168.192.50**, with GUI on **
 
 | Prompt or label | Where you are | How to use it |
 |---|---|---|
-| Mac Terminal | Your Mac | Write USB images, copy files, initiate SSH |
+| host PC terminal | Your host PC | Write USB images, copy files, initiate SSH |
 | `admin@dsp:~$` | Lenovo, ordinary user | Run `sudo -i` before root administration |
 | `root@dsp:~#` | Lenovo, root shell | Run the Lenovo command blocks |
 | GRUB edit screen | Bootloader, before Linux starts | Add one-boot recovery options to the `linux` line |
 
-Do not copy the prompt characters into a command. `overlayroot=disabled` belongs on the GRUB `linux` line, not at a shell prompt. A Mac `scp` command must run in a separate Mac Terminal tab; an SSH session is still the Lenovo even if you opened it from the Mac.
+Do not copy the prompt characters into a command. `overlayroot=disabled` belongs on the GRUB `linux` line, not at a shell prompt. A host PC `scp` command must run in a separate host PC terminal tab; an SSH session is still the Lenovo even if you opened it from the host PC.
 
 ### Installation stages and checkpoints
 
@@ -35,7 +35,9 @@ Do not copy the prompt characters into a command. `overlayroot=disabled` belongs
 
 ## What you will build
 
-**Scarlett 18i20 3rd Gen ⇄ ADAT ⇄ Digiface USB ⇄ Lenovo M93 running CamillaDSP.** Eight channels each way at 96 kHz use four optical cables. The Scarlett is the clock master; the Digiface follows Optical Input 1.
+**Compatible external ADAT device ⇄ ADAT ⇄ Digiface USB ⇄ Lenovo M93 running CamillaDSP.** The DSP software runs on the Lenovo and uses the Digiface as its ALSA audio interface. The external device can be an audio interface, converter or mixer; it is not a required make or model.
+
+This guide's topology carries eight channels each way at 96 kHz over four optical cables. It requires an external device with two ADAT outputs and two ADAT inputs supporting four channels per port at 96 kHz (S/MUX). The external device is the clock master; the Digiface follows Optical Input 1. A device with fewer ports or a different rate needs a different channel/cable plan and commissioning test.
 
 | Component | Selected configuration |
 |---|---|
@@ -54,11 +56,11 @@ Normal operation is intended to tolerate loss of mains. **Keep power on during i
 
 ### What has and has not been tested
 
-The helper scripts have local software tests. The release checksums, GUI command-line startup, DSP config schema and service syntax were checked. Mount operations, systemd service lifecycle and the physical audio device are not available in that test environment: tests substitute those operations. The user has now verified M93 installation, eight independent channels at 96 kHz, external clock sync, protected startup, RAM-only OS changes, DSP save under protection, and backup to the Mac. USB/clock recovery, sustained load and power-loss acceptance tests remain open. See the installation record below; this is not full commissioning.
+The helper scripts have local software tests. The release checksums, GUI command-line startup, DSP config schema and service syntax were checked. Mount operations, systemd service lifecycle and the physical audio device are not available in that test environment: tests substitute those operations. The user has now verified M93 installation, eight independent channels at 96 kHz, external clock sync, protected startup, RAM-only OS changes, DSP save under protection, and backup to the host PC. USB/clock recovery, sustained load and power-loss acceptance tests remain open. See the installation record below; this is not full commissioning.
 
 ### Files and terminology
 
-Download this guide and the matching `DietPi_DSP_Setup.zip` to your Mac. In the repository the ZIP is under `dist/`; standalone downloads may be copied from their actual download location. Preserve the folders when extracting the ZIP. The ZIP contains:
+Download this guide and the matching `DietPi_DSP_Setup.zip` to your host PC. In the repository the ZIP is under `dist/`; standalone downloads may be copied from their actual download location. Preserve the folders when extracting the ZIP. The ZIP contains:
 
 | File (inside its source folder) | Purpose |
 |---|---|
@@ -71,7 +73,9 @@ Download this guide and the matching `DietPi_DSP_Setup.zip` to your Mac. In the 
 | `SHA256SUMS` | Internal file-integrity checklist |
 | `docs/TEST_REPORT.md` | What was checked and remaining hardware checks |
 
-**Commands marked “Mac” run on your Mac. All other command blocks run on the Lenovo in a root shell.** `YOUR_DSP_IP` means the Lenovo address shown on your screen/router; it cannot be known in advance. Hardware-specific observations are marked as such; use actual descriptors and identifiers when installing another device.
+**Host PC** means the separate computer used to prepare USB media, connect through SSH, open the GUI and store backups. It can run Windows, Linux or macOS. Enable/install an OpenSSH client there for the shown `ssh` and `scp` commands. Local paths are examples: use a directory that exists on your host PC, quote paths containing spaces, and use a new local terminal rather than the Lenovo SSH session.
+
+**Commands marked “host PC” run on your host PC. All other command blocks run on the Lenovo in a root shell.** `YOUR_DSP_IP` means the Lenovo address shown on your screen/router; it cannot be known in advance. Hardware-specific observations are marked as such; use actual descriptors and identifiers when installing another device.
 
 ## 1. Prepare the installer and BIOS
 
@@ -81,9 +85,9 @@ Back up anything on the target disk. The DietPi installer images the whole disk 
 
 The concrete default path here is **BIOS/CSM boot**, supported by this generation of ThinkCentre. If you deliberately keep UEFI-only mode, use DietPi's separate UEFI installer instructions and the matching USB-writing method; do not mix its image with the BIOS procedure.
 
-1. On your Mac open <https://dietpi.com/> → Downloads → **Native PC for BIOS/CSM** → **Installer image**, based on **Trixie**. Do not choose the direct-write/live disk image or a Raspberry Pi image.
-2. Check the download's SHA-256 against the value supplied by DietPi. On a Mac run `shasum -a 256` followed by the actual downloaded image path; the compressed image and extracted image have different hashes, so compare the same file the publisher hashes.
-3. Write the BIOS/CSM installer to a spare USB stick with an image-writing tool that supports that downloaded format. DietPi documents Rufus on Windows. For a Mac, use raw image writing for the BIOS image, such as balenaEtcher; select the image and the USB stick, then flash and verify. **Do not extrapolate this to DietPi's UEFI image:** DietPi documents problems with Etcher for UEFI images.
+1. On your host PC open <https://dietpi.com/> → Downloads → **Native PC for BIOS/CSM** → **Installer image**, based on **Trixie**. Do not choose the direct-write/live disk image or a Raspberry Pi image.
+2. Check the download's SHA-256 against the value supplied by DietPi. On the host PC, calculate SHA-256 using `sha256sum IMAGE` on Linux, `shasum -a 256 IMAGE` on macOS, or `Get-FileHash IMAGE -Algorithm SHA256` in Windows PowerShell, replacing `IMAGE` with the actual downloaded path; the compressed image and extracted image have different hashes, so compare the same file the publisher hashes.
+3. Write the BIOS/CSM installer to a spare USB stick with an image-writing tool that supports that downloaded format. DietPi documents Rufus on Windows. Use a host-PC image writer appropriate to its operating system and the selected image, such as Rufus on Windows or balenaEtcher for supported raw BIOS images; select the image and the USB stick, then flash and verify. **Do not extrapolate this to DietPi's UEFI image:** DietPi documents problems with Etcher for UEFI images.
 4. Connect screen, keyboard and Ethernet to the Lenovo. Enter Setup, normally F1. Enable legacy/CSM boot for this path, disable Secure Boot if needed, allow keyboardless boot, and set AC power recovery to **Power On** rather than Last State. Labels vary by BIOS revision.
 5. Use the boot menu, normally F12, and select the installer USB in the matching boot mode.
 6. Follow the Clonezilla-based DietPi installer: choose the supplied image and then the **internal SSD by its size/model**. Confirm only after checking the target. Let the installer finish and shut down.
@@ -108,7 +112,7 @@ ip -br address
 
 `adduser` asks for the admin password. If that account already exists, inspect `id admin` and skip its creation. Use Ethernet DHCP and reserve the shown address/MAC in your router. No guessed static address is supplied.
 
-DietPi normally has Dropbear SSH enabled. Keep it for now; OpenSSH is optional. `openssh-client` above also provides the remote `scp` executable. On your Mac test:
+DietPi normally has Dropbear SSH enabled. Keep it for now; OpenSSH is optional. `openssh-client` above also provides the remote `scp` executable. On your host PC test:
 
 ```sh
 ssh admin@YOUR_DSP_IP
@@ -182,9 +186,9 @@ Required: the correct **separate ext4 filesystem**, `ro`. It deliberately has no
 
 **What this step changes:** it installs packages, release binaries, helper commands and systemd units. It does not know your hardware parameters yet and does not start audio or activate protection. Keep the extracted folders together; installers locate `src/`, `config/`, `web/` and `systemd/` relative to their own `scripts/` folder.
 
-The transfer must finish before unzipping on the Lenovo. If the ZIP was downloaded as a standalone file rather than checked out from this repository, replace `dist/DietPi_DSP_Setup.zip` in the Mac command with its actual local path.
+The transfer must finish before unzipping on the Lenovo. If the ZIP was downloaded as a standalone file rather than checked out from this repository, replace `dist/DietPi_DSP_Setup.zip` in the host PC command with its actual local path.
 
-On your Mac, from the folder where you downloaded the ZIP:
+On your host PC, from the folder where you downloaded the ZIP:
 
 ```sh
 scp -O dist/DietPi_DSP_Setup.zip admin@YOUR_DSP_IP:/home/admin/
@@ -209,22 +213,24 @@ Expected ending: `Files installed. Services and root overlay have NOT been enabl
 
 This is an initial installation script, not an upgrade manager. Do not rerun it over a tuned appliance without a backup and a writable maintenance boot.
 
-## 5. Configure firmware, cables and Scarlett routing
+## 5. Configure firmware, cables and external-device routing
 
-On your Mac/Windows machine, use RME's current firmware tool to enable Digiface USB **Class Compliant mode**. Then connect the Digiface directly to the Lenovo with USB.
+On a host PC supported by RME's firmware tool, use that tool to enable Digiface USB **Class Compliant mode**. Then connect the Digiface directly to the Lenovo with USB.
 
-In Focusrite Control, set your Scarlett 18i20 3rd Gen to **96 kHz, Dual ADAT and Internal clock**. Make four optical connections:
+Use the external device's own control software or hardware menus to configure **96 kHz**, ADAT/S-MUX on both optical banks, and **Internal clock** for the clock-master role. Menu names and port ordering vary by manufacturer; verify them in that device's manual. If its setup software requires a particular operating system, use a supported host PC for that step. The Lenovo needs only the Digiface, not a driver for the external ADAT device.
+
+Make four optical connections:
 
 | From | To |
 |---|---|
-| Scarlett OUT carrying ADAT 1–4 at 96 kHz | Digiface IN 1 |
-| Scarlett OUT carrying ADAT 5–8 at 96 kHz | Digiface IN 2 |
-| Digiface OUT 1 | Scarlett IN for ADAT 1–4 |
-| Digiface OUT 2 | Scarlett IN for ADAT 5–8 |
+| external ADAT device OUT carrying ADAT 1–4 at 96 kHz | Digiface IN 1 |
+| external ADAT device OUT carrying ADAT 5–8 at 96 kHz | Digiface IN 2 |
+| Digiface OUT 1 | external ADAT device IN for ADAT 1–4 |
+| Digiface OUT 2 | external ADAT device IN for ADAT 5–8 |
 
-Use the labels/manual for the Scarlett's physical port order. In its routing, send the intended DAW playback channels to ADAT; route the ADAT returns to the intended analogue outputs. Remove a parallel dry DAW-to-monitor path. Do not route ADAT returns back into their own sends.
+Use the labels/manual for the external ADAT device's physical port order. In its routing, send the intended DAW playback channels to ADAT; route the ADAT returns to the intended analogue outputs. Remove a parallel dry DAW-to-monitor path. Do not route ADAT returns back into their own sends.
 
-For commissioning, leave monitors muted and send one low-level DAW test signal at a time. RME's CC mode defaults to Internal clock, so its optical input clock must be selected on Linux, not assumed to carry over from normal Mac driver settings.
+For commissioning, leave monitors muted and send one low-level DAW test signal at a time. RME's CC mode defaults to Internal clock, so its optical input clock must be selected on Linux, not assumed to carry over from normal host PC driver settings.
 
 ## 6. Select the actual audio parameters
 
@@ -273,7 +279,7 @@ The generated files are:
 
 **Why test before saving?** Schema validation checks the file's structure. It does not establish that ALSA can open the stream, that the clock is synchronized, or that the physical sends return to the correct channels. This stage establishes those separately while startup gain is still reduced.
 
-For the eight-channel test, send a quiet signal to ADAT 1 only and verify return 1 only. Repeat for channels 2–8. Use the Scarlett's return meters with speakers muted if practical; the −30 dB commissioning gain makes those meters low. Do not compensate with a large monitor increase that will become dangerous when gain later changes.
+For the eight-channel test, send a quiet signal to ADAT 1 only and verify return 1 only. Repeat for channels 2–8. Use the external ADAT device's return meters with speakers muted if practical; the −30 dB commissioning gain makes those meters low. Do not compensate with a large monitor increase that will become dangerous when gain later changes.
 
 With speakers muted, run:
 
@@ -324,7 +330,7 @@ Expected: settings unit `active (exited)`, DSP and GUI `active (running)`. Read 
 journalctl -u dsp-settings -u camilladsp -u camillagui -b -n 100 --no-pager
 ```
 
-Open on Mac/iPhone: **`http://YOUR_DSP_IP:5005/gui/index.html`**. Confirm running status and meters. Close the browser and confirm audio continues. The WebSocket API is bound to localhost; keep GUI port 5005 on your trusted LAN, without internet port forwarding.
+Open on a host PC or mobile browser: **`http://YOUR_DSP_IP:5005/gui/index.html`**. Confirm running status and meters. Close the browser and confirm audio continues. The WebSocket API is bound to localhost; keep GUI port 5005 on your trusted LAN, without internet port forwarding.
 
 The DSP startup wrapper waits for the card to appear. Once it does, an invalid clock selector produces a visible error rather than silently waiting forever. It drops privileges with `setpriv`, avoiding a PAM login step that could reset the systemd real-time limits. A running process is not proof of external clock lock or valid audio.
 
@@ -537,7 +543,7 @@ chown admin:admin /home/admin/dsp-settings-backup.tar.gz
 chmod 600 /home/admin/dsp-settings-backup.tar.gz
 ```
 
-On your Mac:
+On your host PC:
 
 ```sh
 scp -O admin@YOUR_DSP_IP:/home/admin/dsp-settings-backup.tar.gz .
@@ -581,7 +587,7 @@ Do not mark the appliance commissioned until these pass:
 | AC removal/restoration during normal RO operation | Lenovo powers on and audio returns |
 | Digiface absent at boot, connected later | Device detected and configured |
 | USB disconnect/reconnect | Audio recovers or a concrete recovery gap is identified |
-| Scarlett off at boot, later on | External clock and 96 kHz audio recover |
+| External ADAT device off at boot, later on | External clock and 96 kHz audio recover |
 | ADAT clock lost/restored | No lasting stall or wrong clock source |
 | Sustained actual DSP load | No persistent underruns/clipping at chosen buffer |
 
@@ -596,7 +602,7 @@ Commission at 512-sample chunks; then try 256 and 128. At 96 kHz 256 samples las
 - Digiface ID `USB24324903`: 16 capture / 18 playback channels, `S32_LE` at 96000 Hz. Sync Source numid 17, enum 1 (`Input 1`); actual source Input 1, current rate 96000, Input 1 and Input 2 both Sync.
 - Eight individual channels passed; DSP/GUI restart automatically. A saved filter remained after service restart; protected saving succeeded. Confirm saved-filter return after reboot as a separate acceptance observation if not already done.
 - Final verified normal mounts: `/` overlay rw, `/media/root-ro` ext4 ro, `/media/root-rw` tmpfs, DSPSTORE/EFI ro, no swap and no failed units.
-- An unsaved `/etc` file disappeared across reboot. Startup gain changed permanently to **0 dB**. Settings archive copied to Mac.
+- An unsaved `/etc` file disappeared across reboot. Startup gain changed permanently to **0 dB**. Settings archive copied to host PC.
 - The IP is reserved in the router at **192.168.192.50**. CamillaGUI: **http://192.168.192.50:5005/gui/index.html**. Earlier DHCP addresses in the recovery conversation are obsolete.
 - Audio started during a network timeout. Physically disconnected-network boot is still a separate test.
 - Open: disconnected-network boot, USB/device/clock recovery, sustained load, offline disk image, AC recovery, and review of the machine's kernel update notice in maintenance mode. Maintenance-menu selection itself still needs an explicit verification.
@@ -628,4 +634,3 @@ Project references used during review:
 - ALSA format mapping: <https://github.com/HEnquist/camilladsp/blob/v4.1.3/backend_alsa.md>
 - CamillaGUI release: <https://github.com/HEnquist/camillagui-backend/releases/tag/v4.1.0>
 - RME clock control/manual: <https://rme-audio.de/downloads/dface_usb_e.pdf>
-- Scarlett optical I/O: <https://userguides.focusrite.com/hc/en-gb/articles/23031280130706-Scarlett-18i20-3rd-Gen-hardware-features>

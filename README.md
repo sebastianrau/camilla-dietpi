@@ -1,6 +1,6 @@
 # CamillaDSP on DietPi — Lenovo M93
 
-Eight-channel 96 kHz DSP appliance using an RME Digiface USB and Scarlett 18i20 3rd Gen over ADAT.
+Eight-channel 96 kHz DSP appliance using an RME Digiface USB connected over ADAT to a compatible external interface, converter or mixer. No specific external interface brand is required.
 
 ## Choose the right document
 
@@ -23,7 +23,7 @@ Normal boot combines a read-only OS disk with a writable RAM overlay. Programs c
 
 For a filter change, **apply → save YAML → select active file → save permanently**. For Linux/package changes, boot the writable maintenance entry instead. The GUI's ordinary YAML save and the permanent-save button serve different purposes.
 
-The audio path is Scarlett ADAT sends → Digiface capture → CamillaDSP → Digiface playback → Scarlett ADAT returns. Scarlett is clock master at 96 kHz. Listening to a parallel dry path as well as the return can create a hollow or metallic sound.
+The audio path is external ADAT device ADAT sends → Digiface capture → CamillaDSP → Digiface playback → external ADAT device ADAT returns. The documented topology uses the external ADAT device as clock master at 96 kHz. Listening to a parallel dry path as well as the return can create a hollow or metallic sound.
 
 Personal DSP backups are excluded from version control. Do not run the initial installer over a tuned appliance as an upgrade.
 

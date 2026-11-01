@@ -4,7 +4,7 @@ Start with the symptom below. Keep listening levels low while investigating audi
 
 ## A filter has no audible effect
 
-A named filter must also be referenced by a Pipeline filter step on the channel being heard. Check that the step is enabled, apply the configuration, and verify the active file. Then check the Scarlett's listening-output source: a dry monitoring path can conceal the processed return.
+A named filter must also be referenced by a Pipeline filter step on the channel being heard. Check that the step is enabled, apply the configuration, and verify the active file. Then check the external ADAT device's listening-output source: a dry monitoring path can conceal the processed return.
 
 Applying, writing YAML and saving permanently are separate actions. See [the operating workflow](OPERATIONS.md#edit-a-filter-and-make-it-permanent).
 
@@ -12,7 +12,7 @@ Applying, writing YAML and saving permanently are separate actions. See [the ope
 
 1. Temporarily reduce GUI main gain to −30 dB without saving. Watch whether the clipped-sample counter increases during playback.
 2. Bypass the suspected filter step and apply. If the sound clears, inspect its settings and gain.
-3. Inspect Scarlett routing. Avoid mixing a direct/DAW signal with the delayed ADAT return, and avoid feeding the returns back into their sends.
+3. Inspect external ADAT device routing. Avoid mixing a direct/DAW signal with the delayed ADAT return, and avoid feeding the returns back into their sends.
 4. Check clock/rate and logs below.
 
 The user's “tin box” incident was resolved by correcting routing. That observation does not mean every future distortion has the same cause.

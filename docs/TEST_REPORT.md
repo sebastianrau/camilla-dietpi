@@ -32,7 +32,7 @@ The tests do not partition disks or invoke real mount/systemctl mutations. They 
 ## Revision-3 local checks (1 November 2026)
 
 - Shell syntax checked for the new protection helper; embedded Python and project Python sources parsed successfully.
-- An early local unit-test attempt was blocked because the Mac Python lacked PyYAML. This was later resolved with an isolated test environment; the complete 14-test pass is recorded below.
+- An early local unit-test attempt was blocked because the host PC Python lacked PyYAML. This was later resolved with an isolated test environment; the complete 14-test pass is recorded below.
 - Fresh commissioning still uses -30 dB; the installed user's 0 dB setting is documented rather than forced onto new hardware.
 - Installer does not activate protection automatically. The explicit helper requires a real writable ext4 root and an initramfs-tools/GRUB boot stack.
 

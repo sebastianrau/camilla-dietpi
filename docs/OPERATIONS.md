@@ -8,7 +8,7 @@ This is the operating manual for the installed Lenovo. For a fresh installation,
 |---|---|
 | Router reservation | `192.168.192.50` |
 | CamillaGUI | <http://192.168.192.50:5005/gui/index.html> |
-| Mac SSH command | `ssh -i ~/.ssh/dsp_admin_ed25519 admin@192.168.192.50` |
+| host PC SSH command | `ssh -i ~/.ssh/dsp_admin_ed25519 admin@192.168.192.50` |
 | Permanent-save endpoint | HTTP port `5006`, used by the GUI button |
 | Startup main gain | `0 dB` on this appliance; fresh setup defaults to `−30 dB` |
 | Normal boot | Protected OS with temporary writes in RAM |
@@ -18,9 +18,9 @@ Port 80 is requested but **not implemented**. The save button worked in a tempor
 
 ## Understand the audio path
 
-Your DAW sends audio through the Scarlett's ADAT outputs. The Digiface receives it, CamillaDSP processes it, and the Digiface sends it back through ADAT to the Scarlett's selected analogue outputs.
+Your DAW or other source sends audio through a compatible external device's ADAT outputs. The external device can be any interface, converter or mixer that meets the channel, rate and clock requirements; no specific brand is required. The Digiface receives it, CamillaDSP processes it, and the Digiface sends it back through ADAT to the external ADAT device's selected analogue outputs.
 
-At 96 kHz, each optical connection carries four channels in this configuration. Two optical cables carry eight sends; two more carry eight returns. The Scarlett supplies the clock, and the Digiface follows Input 1. Both connected input banks were observed synchronized at 96000 Hz.
+At 96 kHz, each optical connection carries four channels in this configuration. Two optical cables carry eight sends; two more carry eight returns. The external ADAT device supplies the clock, and the Digiface follows Input 1. Both connected input banks were observed synchronized at 96000 Hz.
 
 The Digiface exposes 16 capture and 18 playback channels at this rate, even though this setup uses eight audio paths. The ALSA stream must use the hardware's complete channel count; the mixer determines which channels are used. Do not reduce ALSA channel counts to eight just because you use eight signals.
 
@@ -35,7 +35,7 @@ For each listening output, select the intended processed ADAT return. A simultan
 | OS files edited in normal overlay mode | Lost; changes exist in RAM |
 | Snapshot under `/srv/dsp-store` | Retained on its separate disk partition |
 | OS files edited during maintenance boot | Retained on the root disk |
-| Backup copied to the Mac | Retained independently of the Lenovo |
+| Backup copied to the host PC | Retained independently of the Lenovo |
 
 The root overlay presents a writable filesystem to applications. Its lower layer is the real SSD, mounted read-only; its upper layer is RAM. This lets programs operate normally while avoiding ordinary OS writes to the SSD. The separate settings partition is deliberately outside this overlay so a save can reach real storage.
 
@@ -72,9 +72,9 @@ This appliance was changed from commissioning gain −30 dB to 0 dB. That is a 3
 
 To change the fixed gain, mute the listening outputs, boot maintenance mode, confirm real root is writable, edit the existing `STARTUP_GAIN_DB` assignment and reboot normally. Do not expect `dsp-save` to preserve edits to that OS file made in protected mode.
 
-## SSH: Mac commands and Lenovo commands
+## SSH: host PC commands and Lenovo commands
 
-**On the Mac**, open Terminal:
+**On the host PC** (Windows, Linux or macOS), open a local terminal with an OpenSSH client available:
 
 ```sh
 ssh -i ~/.ssh/dsp_admin_ed25519 admin@192.168.192.50
@@ -86,9 +86,9 @@ ssh -i ~/.ssh/dsp_admin_ed25519 admin@192.168.192.50
 sudo -i
 ```
 
-A prompt beginning `admin@dsp` is an ordinary Lenovo user. `root@dsp` is the Lenovo root shell. Neither is the Mac. A command using `~/Documents` while at `root@dsp` points to `/root/Documents` on the Lenovo.
+A prompt beginning `admin@dsp` is an ordinary Lenovo user. `root@dsp` is the Lenovo root shell. Neither is the host PC. A command using `~/Documents` while at `root@dsp` points to `/root/Documents` on the Lenovo.
 
-The SSH key for this Lenovo is separate from the Mac's GitHub key. Do not put either private key into this repository.
+The SSH key for this Lenovo is separate from the host PC's GitHub key. Do not put either private key into this repository.
 
 ## Enter maintenance mode
 
@@ -133,7 +133,7 @@ systemctl is-active dsp-settings camilladsp camillagui
 
 These checks establish filesystem/service state. Audio, synchronization and recovery need their own tests.
 
-## Back up settings to the Mac
+## Back up settings to the host PC
 
 **Lenovo, root shell:**
 
@@ -143,13 +143,13 @@ chown admin:admin /home/admin/dsp-settings-backup.tar.gz
 chmod 600 /home/admin/dsp-settings-backup.tar.gz
 ```
 
-**Mac, a separate Terminal tab:**
+**host PC, a separate Terminal tab:**
 
 ```sh
 scp -O -i ~/.ssh/dsp_admin_ed25519 admin@192.168.192.50:/home/admin/dsp-settings-backup.tar.gz ~/Documents/camilla-dsp-setup/
 ```
 
-Copy before rebooting: `/home/admin` on the protected Lenovo is also in the RAM overlay. The Mac copy survives independently. This filename overwrites the previous local backup; rename older copies first if you want to retain multiple exports. DSPSTORE itself keeps versioned snapshots until explicitly pruned.
+Use an existing destination directory on your host PC; `~/Documents/camilla-dsp-setup/` is an example. Windows users can substitute a quoted absolute Windows path. Copy before rebooting: `/home/admin` on the protected Lenovo is also in the RAM overlay. The host PC copy survives independently. This filename overwrites the previous local backup; rename older copies first if you want to retain multiple exports. DSPSTORE itself keeps versioned snapshots until explicitly pruned.
 
 A settings backup restores DSP snapshots, not Debian, GRUB or installed applications. Make a complete offline disk image as a separate recovery measure. Personal backups are excluded by `.gitignore` and do not belong in the public repository.
 
@@ -157,7 +157,7 @@ A settings backup restores DSP snapshots, not Debian, GRUB or installed applicat
 
 - Install the save button permanently in maintenance mode and verify it after reboot.
 - Implement the requested HTTP port 80 change together with the button's origin validation; changing the GUI port alone breaks button requests.
-- Test physically disconnected-network boot and USB/Scarlett/ADAT clock loss and recovery.
+- Test physically disconnected-network boot and USB/external-device/ADAT clock loss and recovery.
 - Test sustained DSP load and clipping with actual filters.
 - Make an offline disk image before AC-loss/recovery testing.
 - Review the kernel update notice in maintenance mode and verify the maintenance entry still loads a valid kernel/initrd afterward.
