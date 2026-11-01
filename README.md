@@ -2,11 +2,28 @@
 
 Eight-channel 96 kHz DSP appliance using an RME Digiface USB and Scarlett 18i20 3rd Gen over ADAT.
 
+## Choose the right document
+
+| You want to… | Read |
+|---|---|
+| Install a new appliance | [Installation guide](docs/DietPi_CamillaDSP_M93_Install.md) |
+| Use filters, save, back up or enter maintenance | [Operating manual](docs/OPERATIONS.md) |
+| Diagnose sound, boot, network or save failures | [Troubleshooting](docs/TROUBLESHOOTING.md) |
+| Understand test evidence and remaining gaps | [Verification report](docs/TEST_REPORT.md) |
+
 Start with [the installation guide](docs/DietPi_CamillaDSP_M93_Install.md). The matching [setup ZIP](dist/DietPi_DSP_Setup.zip) includes the installer, hardware configuration, snapshot tools, systemd units, root-overlay setup and optional GUI permanent-save button.
 
 The guide records verified hardware results and remaining acceptance tests. See [TEST_REPORT.md](docs/TEST_REPORT.md) for local checks and their limits. Initial setup uses -30 dB startup gain; the guide explains changing it after commissioning.
 
 Current appliance GUI uses HTTP port 5005. Port 80 is requested but has not been implemented. The GUI save button has been verified in a RAM-overlay trial; persistent installation is pending.
+
+## How persistence works
+
+Normal boot combines a read-only OS disk with a writable RAM overlay. Programs can write normally, but those OS changes disappear at reboot. DSP presets use a separate, normally read-only partition: `dsp-save` briefly stops audio, validates and archives the selected configuration, then restarts the services.
+
+For a filter change, **apply → save YAML → select active file → save permanently**. For Linux/package changes, boot the writable maintenance entry instead. The GUI's ordinary YAML save and the permanent-save button serve different purposes.
+
+The audio path is Scarlett ADAT sends → Digiface capture → CamillaDSP → Digiface playback → Scarlett ADAT returns. Scarlett is clock master at 96 kHz. Listening to a parallel dry path as well as the return can create a hollow or metallic sound.
 
 Personal DSP backups are excluded from version control. Do not run the initial installer over a tuned appliance as an upgrade.
 

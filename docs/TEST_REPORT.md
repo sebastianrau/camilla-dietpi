@@ -1,8 +1,8 @@
 # Revision 3 verification record
 
-Date: 24 October 2026.
+Updated: 1 November 2026. Original revision-2 software checks: 24 October 2026.
 
-## Passed locally
+## Historical revision-2 checks
 
 - 9 snapshot tests: archive save/restore; retained versions; corruption rejection; write-failure cleanup; unsafe paths/links; invalid active-config location; failed active-pointer update; combined primary/cleanup errors; snapshot selection against original checksum metadata.
 - 2 ALSA descriptor tests: multiple alternate interfaces with different capture/playback counts; packed versus padded 24-bit format mapping.
@@ -32,7 +32,7 @@ The tests do not partition disks or invoke real mount/systemctl mutations. They 
 ## Revision-3 local checks (1 November 2026)
 
 - Shell syntax checked for the new protection helper; embedded Python and project Python sources parsed successfully.
-- The local unit-test attempt was blocked at import because the Mac Python lacks PyYAML; no new test-pass claim is made. Existing revision-2 results above are historical.
+- An early local unit-test attempt was blocked because the Mac Python lacked PyYAML. This was later resolved with an isolated test environment; the complete 14-test pass is recorded below.
 - Fresh commissioning still uses -30 dB; the installed user's 0 dB setting is documented rather than forced onto new hardware.
 - Installer does not activate protection automatically. The explicit helper requires a real writable ext4 root and an initramfs-tools/GRUB boot stack.
 

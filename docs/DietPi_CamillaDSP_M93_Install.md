@@ -4,6 +4,35 @@ Revision 3 • 1 November 2026
 
 This revision incorporates the M93 installation and protected-boot fixes verified on 1 November 2026. It replaces the earlier procedure. It closes missing account/package/file-creation steps, removes guessed audio settings, improves save failure handling, and supplies the application scripts as files in **`DietPi_DSP_Setup.zip`**. Read this guide and use the matching revision-3 ZIP together.
 
+## How to use this guide
+
+Use this document for a **fresh installation**, in numbered order. Use [Operations](OPERATIONS.md) for daily use of the already installed machine, and [Troubleshooting](TROUBLESHOOTING.md) when a check fails. The [verification report](TEST_REPORT.md) separates local software tests from physical hardware results.
+
+The current appliance is already installed at **192.168.192.50**, with GUI on **port 5005** and startup gain **0 dB**. Port 80 and persistent GUI-button installation are still pending. Do not repeat disk partitioning or the initial application installer on this working system just to update documentation or an optional feature.
+
+### Know where a command runs
+
+| Prompt or label | Where you are | How to use it |
+|---|---|---|
+| Mac Terminal | Your Mac | Write USB images, copy files, initiate SSH |
+| `admin@dsp:~$` | Lenovo, ordinary user | Run `sudo -i` before root administration |
+| `root@dsp:~#` | Lenovo, root shell | Run the Lenovo command blocks |
+| GRUB edit screen | Bootloader, before Linux starts | Add one-boot recovery options to the `linux` line |
+
+Do not copy the prompt characters into a command. `overlayroot=disabled` belongs on the GRUB `linux` line, not at a shell prompt. A Mac `scp` command must run in a separate Mac Terminal tab; an SSH session is still the Lenovo even if you opened it from the Mac.
+
+### Installation stages and checkpoints
+
+| Stage | Purpose | Check before moving on |
+|---|---|---|
+| Sections 1–2 | Install Linux and establish SSH | Trixie, x86-64, root shell, writable disk root |
+| Section 3 | Separate durable DSP data from OS protection | One ext4 DSPSTORE mounted read-only |
+| Sections 4–6 | Install software and identify real hardware | Verified release files and valid config |
+| Sections 7–8 | Prove audio and startup | Eight matching returns, snapshot restoration, reboot success |
+| Sections 9–11 | Activate and verify disk protection | RAM upper layer, read-only lower disk, no failed services |
+| Sections 12–14 | Operate, maintain and back up | Saved DSP data returns; backups copied off the machine |
+| Section 15 | Test fault recovery and actual load | Record results individually; do not assume success |
+
 ## What you will build
 
 **Scarlett 18i20 3rd Gen ⇄ ADAT ⇄ Digiface USB ⇄ Lenovo M93 running CamillaDSP.** Eight channels each way at 96 kHz use four optical cables. The Scarlett is the clock master; the Digiface follows Optical Input 1.
@@ -33,20 +62,22 @@ Download this guide and the matching `DietPi_DSP_Setup.zip` to your Mac. In the 
 
 | File (inside its source folder) | Purpose |
 |---|---|
-| `install-files.sh` | Installs required packages, verified release binaries, helper files and units; does not partition or activate protection |
-| `configure-dsp.py` | Prompts for actual ALSA card, stream parameters and clock selector; creates initial config |
-| `dsp-state` / `run-dsp` | Snapshot management / hardware and engine startup |
-| Three `.service` files | Settings restore, DSP and GUI units |
-| `gui.yml` | GUI paths and local WebSocket configuration |
-| `configure-protection.sh` / `overlay-remount.conf` | Explicit writable-boot protection setup and tested root-remount workaround |
+| `scripts/install-files.sh` | Installs required packages, verified release binaries, helper files and units; does not partition or activate protection |
+| `src/configure-dsp.py` | Prompts for actual ALSA card, stream parameters and clock selector; creates initial config |
+| `src/dsp-state` / `src/run-dsp` | Snapshot management / hardware and engine startup |
+| `systemd/*.service` | Settings restore, DSP, GUI and optional web-save units |
+| `config/gui.yml` | GUI paths and local WebSocket configuration |
+| `scripts/configure-protection.sh` / `systemd/overlay-remount.conf` | Explicit writable-boot protection setup and tested root-remount workaround |
 | `SHA256SUMS` | Internal file-integrity checklist |
-| `TEST_REPORT.md` | What was checked and remaining hardware checks |
+| `docs/TEST_REPORT.md` | What was checked and remaining hardware checks |
 
-**Commands marked “Mac” run on your Mac. All other command blocks run on the Lenovo in a root shell.** `YOUR_DSP_IP` means the Lenovo address shown on your screen/router; it cannot be known in advance. No card names or channel counts in this guide are claimed to describe hardware we have not inspected.
+**Commands marked “Mac” run on your Mac. All other command blocks run on the Lenovo in a root shell.** `YOUR_DSP_IP` means the Lenovo address shown on your screen/router; it cannot be known in advance. Hardware-specific observations are marked as such; use actual descriptors and identifiers when installing another device.
 
 ## 1. Prepare the installer and BIOS
 
 Back up anything on the target disk. The DietPi installer images the whole disk and erases its contents.
+
+**For the existing installed M93:** UEFI + GRUB is already working; preserve it. The steps below describe an alternative fresh-install BIOS path.
 
 The concrete default path here is **BIOS/CSM boot**, supported by this generation of ThinkCentre. If you deliberately keep UEFI-only mode, use DietPi's separate UEFI installer instructions and the matching USB-writing method; do not mix its image with the BIOS procedure.
 
@@ -100,6 +131,10 @@ Reboot once now, reconnect and run `sudo -i` again. This completes first boot be
 
 ## 3. Make the DSP settings partition
 
+**Why a second data partition?** Normal OS writes will later go into a RAM overlay and disappear at reboot. DSP settings need a deliberate path to durable storage. DSPSTORE provides that path without making the OS disk root writable during ordinary use. It is normally read-only and becomes writable only for a save or snapshot-selection operation.
+
+Shrinking ext4 requires an unmounted filesystem, which is why this step uses a live USB rather than the running DietPi root. Shrink the end only; moving the beginning adds unnecessary risk to the boot layout.
+
 DietPi's native installer copies an existing partition layout rather than offering a Debian-style custom partition screen. This is why a separate partition operation is needed. It can be performed from any suitable live environment; **GParted is the documented method here, not a software dependency of CamillaDSP**. You may reuse the installer stick by rewriting it after DietPi installation is complete.
 
 1. Download GParted Live from <https://gparted.org/livecd.php>, verify its checksum and write it to USB.
@@ -145,6 +180,10 @@ Required: the correct **separate ext4 filesystem**, `ro`. It deliberately has no
 
 ## 4. Copy and install the setup bundle
 
+**What this step changes:** it installs packages, release binaries, helper commands and systemd units. It does not know your hardware parameters yet and does not start audio or activate protection. Keep the extracted folders together; installers locate `src/`, `config/`, `web/` and `systemd/` relative to their own `scripts/` folder.
+
+The transfer must finish before unzipping on the Lenovo. If the ZIP was downloaded as a standalone file rather than checked out from this repository, replace `dist/DietPi_DSP_Setup.zip` in the Mac command with its actual local path.
+
 On your Mac, from the folder where you downloaded the ZIP:
 
 ```sh
@@ -189,6 +228,10 @@ For commissioning, leave monitors muted and send one low-level DAW test signal a
 
 ## 6. Select the actual audio parameters
 
+**Why inspect instead of copying values?** USB interfaces expose different stream layouts at different sample rates. ALSA's capture and playback channel counts describe the full stream, not the number of channels you plan to process. The observed Digiface uses 16 capture and 18 playback channels at 96 kHz; those values come from its descriptor and must be rechecked on other hardware.
+
+Selection menus use zero-based indexes. In the observed card menu, index **0** was Digiface and index **1** was HDMI. The clock selector's `numid` is a different kind of number: select the control first, then choose its displayed enum index. Never assume all three numbers are interchangeable.
+
 Run the supplied configuration program:
 
 ```sh
@@ -227,6 +270,10 @@ The generated files are:
 **Do not reboot yet:** `/run` is RAM and no snapshot exists. If configuration was interrupted after creating the initial files, inspect them before rerunning. Only during this first, unsaved setup may you remove `/run/camilladsp` to start over; never do this to a running tuned configuration.
 
 ## 7. Prove actual audio, then make the first saved snapshot
+
+**Why test before saving?** Schema validation checks the file's structure. It does not establish that ALSA can open the stream, that the clock is synchronized, or that the physical sends return to the correct channels. This stage establishes those separately while startup gain is still reduced.
+
+For the eight-channel test, send a quiet signal to ADAT 1 only and verify return 1 only. Repeat for channels 2–8. Use the Scarlett's return meters with speakers muted if practical; the −30 dB commissioning gain makes those meters low. Do not compensate with a large monitor increase that will become dangerous when gain later changes.
 
 With speakers muted, run:
 
@@ -336,6 +383,10 @@ systemctl list-timers --all
 Disable any separately installed automatic-upgrade service you deliberately added. Preserve DietPi's required boot/network/RAMlog services.
 
 ## 10. Activate the root RAM overlay
+
+**What protection means here:** applications see writable `/`, but writes go to RAM. The real disk root must remain read-only underneath. A writable-looking `/` is therefore correct only when it is an overlay with a tmpfs upper layer and a read-only disk lower layer. DSPSTORE and EFI are separate mounts and must be checked individually.
+
+The protection helper combines fixes derived from this installation. Those individual fixes were verified manually on the M93; the combined helper has local checks but has not been run end-to-end on the appliance. Keep a local keyboard and screen for the first protected boot, and compare actual mounts with section 11 rather than relying on package installation success.
 
 ### Check the actual boot stack first
 
