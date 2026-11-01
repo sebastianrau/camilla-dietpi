@@ -1,0 +1,12 @@
+[Unit]
+Description=Restore saved DSP settings into RAM
+RequiresMountsFor=/srv/dsp-store
+Before=camilladsp.service camillagui.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/dsp-state restore
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

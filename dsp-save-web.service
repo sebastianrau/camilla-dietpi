@@ -1,0 +1,15 @@
+[Unit]
+Description=Permanent DSP save button endpoint
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/bin/python3 /opt/camilla/bin/dsp-save-web.py
+User=root
+Restart=on-failure
+RestartSec=3
+UMask=0077
+# Runs outside camillagui.service: dsp-save stops and restarts that unit.
+
+[Install]
+WantedBy=multi-user.target

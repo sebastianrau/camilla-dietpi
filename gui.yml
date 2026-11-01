@@ -1,0 +1,16 @@
+camilla_host: "127.0.0.1"
+camilla_port: 1234
+bind_address: "0.0.0.0"
+port: 5005
+ssl_certificate: null
+ssl_private_key: null
+gui_config_file: null
+config_dir: "/run/camilladsp/configs"
+coeff_dir: "/run/camilladsp/coeffs"
+default_config: "/run/camilladsp/configs/startup.yml"
+statefile_path: "/run/camilladsp/state.yml"
+log_file: null
+on_set_active_config: null
+on_get_active_config: null
+supported_capture_types: ["Alsa"]
+supported_playback_types: ["Alsa"]

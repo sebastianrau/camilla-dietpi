@@ -1,0 +1,10 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+# Appliance snapshots and personal backups stay local.
+*backup*.tar.gz
+snapshots/
+*.pem
+*.key

@@ -1,0 +1,18 @@
+[Unit]
+Description=CamillaDSP ADAT processor
+Requires=dsp-settings.service
+After=dsp-settings.service sound.target
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=/opt/camilla/bin/run-dsp
+Restart=always
+RestartSec=5
+LimitRTPRIO=70
+LimitMEMLOCK=infinity
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

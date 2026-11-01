@@ -1,0 +1,20 @@
+[Unit]
+Description=CamillaDSP browser interface
+Requires=dsp-settings.service
+After=dsp-settings.service camilladsp.service
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+User=dsp
+Group=audio
+WorkingDirectory=/opt/camilla/gui/camillagui_backend
+Environment=MPLCONFIGDIR=/run/camilladsp/mpl-cache
+ExecStart=/opt/camilla/gui/camillagui_backend/camillagui_backend -c /etc/camilladsp/gui.yml
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

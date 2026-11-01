@@ -1,0 +1,17 @@
+#!/bin/sh
+set -eu
+. /etc/default/camilladsp-hardware
+: "${CARD_ID:?Missing CARD_ID}"
+: "${CLOCK_CONTROL:?Missing CLOCK_CONTROL}"
+: "${CLOCK_VALUE:?Missing CLOCK_VALUE}"
+: "${STARTUP_GAIN_DB:?Missing STARTUP_GAIN_DB}"
+echo "Waiting for ALSA card $CARD_ID"
+until amixer -c "$CARD_ID" info >/dev/null 2>&1; do
+    sleep 2
+done
+echo "Configuring clock source on $CARD_ID"
+amixer -c "$CARD_ID" cset "$CLOCK_CONTROL" "$CLOCK_VALUE"
+exec setpriv --reuid=dsp --regid=audio --init-groups /opt/camilla/bin/camilladsp \
+    -a 127.0.0.1 -p 1234 \
+    -s /run/camilladsp/state.yml \
+    --gain="$STARTUP_GAIN_DB"
