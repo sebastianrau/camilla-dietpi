@@ -14,7 +14,7 @@ This is the operating manual for the installed Lenovo. For a fresh installation,
 | Normal boot | Protected OS with temporary writes in RAM |
 | Maintenance boot | Real root disk writable, selected from GRUB |
 
-Port 80 and the save-button service were installed during maintenance on 2 November. Their protected-reboot check remains pending. The new one-button editor integration still requires installation and browser verification; the earlier installed button requires a separate YAML save.
+Port 80 and the save-button service were installed during maintenance on 2 November. Their protected-reboot check remains pending. The updated one-button editor integration was installed and successfully saved without audible interruption. A normal protected reboot still needs verification.
 
 ## Understand the audio path
 

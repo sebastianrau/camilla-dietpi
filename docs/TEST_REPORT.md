@@ -57,3 +57,7 @@ All 19 local tests pass. New JavaScript tests execute the bridge with an editor 
 ## Restart-free save implementation — 2 November 2026
 
 Save now stages and validates an immutable RAM copy, detects concurrent file changes, and writes the snapshot without stop/start calls. Tests check no service mutations on success or failure, source edits after staging do not alter the archive, and continuously changing settings fail before remounting the store writable. Editor tests now require save-YAML, apply-config, select-active ordering, with every failed step blocking the snapshot request. Real-appliance no-restart/PID, volume retention and under-load audio verification remain pending.
+
+## Appliance live-save observation — 2 November 2026
+
+The updated helper and editor integration were installed during writable maintenance mode. The user saved through the button and reported no audible interruption. The status endpoint independently returned success for `dsp-20261102-082824-c26e3ba4.tar.gz`, valid configuration, read-only settings volume and “Audio services were not restarted.” `findmnt` confirmed DSPSTORE ext4 ro. This is one real-appliance save observation; process-PID/volume comparisons, sustained-load testing and protected-reboot verification remain separate checks. Root was still real ext4 rw during this observation, so a normal reboot is needed to restore OS protection.
