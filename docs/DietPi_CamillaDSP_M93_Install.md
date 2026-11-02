@@ -8,7 +8,7 @@ This revision incorporates the M93 installation and protected-boot fixes verifie
 
 Use this document for a **fresh installation**, in numbered order. Use [Operations](OPERATIONS.md) for daily use of the already installed machine, and [Troubleshooting](TROUBLESHOOTING.md) when a check fails. The [verification report](TEST_REPORT.md) separates local software tests from physical hardware results.
 
-The current appliance is already installed at **192.168.192.50**, with GUI moved to **port 80** and startup gain **0 dB**. Port 80, the editor-save bridge and restart-free snapshot helper survived protected reboot on 2 November. A maintenance-mode save was verified without audible interruption; repeat a save under protection as a final check. Fresh installations retain port 5005 unless the optional port-80 installer is used. Do not repeat disk partitioning or the initial application installer on this working system just to update documentation or an optional feature.
+The current appliance is already installed at **192.168.192.50**, with GUI moved to **port 80** and startup gain **0 dB**. Port 80, the editor-save bridge and restart-free snapshot helper survived protected reboot on 2 November. A maintenance-mode save was verified without audible interruption; the user also confirmed uninterrupted saving after protected reboot. Fresh installations retain port 5005 unless the optional port-80 installer is used. Do not repeat disk partitioning or the initial application installer on this working system just to update documentation or an optional feature.
 
 ### Know where a command runs
 
@@ -492,7 +492,7 @@ Volume and mute changes affect the running engine immediately. Snapshots include
 
 The setup bundle includes `install-gui-save.sh`, `dsp-save-button.js`, `dsp-save-web.py`, and `dsp-save-web.service`. This is a local extension of the pinned GUI, not an upstream CamillaGUI feature.
 
-**Current appliance status:** the combined editor-save button and restart-free helper were installed in maintenance mode and saved successfully without audible interruption. After the normal reboot on 2 November, port 80, the editor bridge and save endpoint remained available; root used RAM overlay with read-only lower disk, settings and EFI mounts. DSP reported RUNNING at 96 kHz. Repeat one save under protection to complete the updated-helper check.
+**Current appliance status:** the combined editor-save button and restart-free helper were installed in maintenance mode and saved successfully without audible interruption. After the normal reboot on 2 November, port 80, the editor bridge and save endpoint remained available; root used RAM overlay with read-only lower disk, settings and EFI mounts. DSP reported RUNNING at 96 kHz. The user subsequently confirmed uninterrupted saving under protection.
 
 For an optional protected-mode trial, extract the current ZIP and run as root:
 

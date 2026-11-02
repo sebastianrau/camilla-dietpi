@@ -14,7 +14,7 @@ This is the operating manual for the installed Lenovo. For a fresh installation,
 | Normal boot | Protected OS with temporary writes in RAM |
 | Maintenance boot | Real root disk writable, selected from GRUB |
 
-Port 80, the combined-save editor bridge and the restart-free snapshot helper survived the protected reboot on 2 November. Before reboot the user confirmed a save without audible interruption. After reboot, the save endpoint was ready, DSP reported RUNNING at 96 kHz with zero clipped samples, and protected mounts were correct. A new save after this protected reboot is still a useful final check of the updated helper under protection.
+Port 80, the combined-save editor bridge and the restart-free snapshot helper survived the protected reboot on 2 November. Before reboot the user confirmed a save without audible interruption. After reboot, the save endpoint was ready, DSP reported RUNNING at 96 kHz with zero clipped samples, and protected mounts were correct. The user subsequently confirmed the combined save also worked without interruption in protected mode.
 
 ## Understand the audio path
 
@@ -158,7 +158,6 @@ A settings backup restores DSP snapshots, not Debian, GRUB or installed applicat
 
 ## Remaining work
 
-- Confirm one combined save after the protected reboot; its installation and port 80 have survived reboot.
 - Test physically disconnected-network boot and USB/external-device/ADAT clock loss and recovery.
 - Test sustained DSP load and clipping with actual filters.
 - Make an offline disk image before AC-loss/recovery testing.
