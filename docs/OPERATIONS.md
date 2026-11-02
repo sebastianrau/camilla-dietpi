@@ -7,14 +7,14 @@ This is the operating manual for the installed Lenovo. For a fresh installation,
 | Item | Current value |
 |---|---|
 | Router reservation | `192.168.192.50` |
-| CamillaGUI | <http://192.168.192.50:5005/gui/index.html> |
+| CamillaGUI | <http://192.168.192.50/gui/index.html> |
 | host PC SSH command | `ssh -i ~/.ssh/dsp_admin_ed25519 admin@192.168.192.50` |
 | Permanent-save endpoint | HTTP port `5006`, used by the GUI button |
 | Startup main gain | `0 dB` on this appliance; fresh setup defaults to `−30 dB` |
 | Normal boot | Protected OS with temporary writes in RAM |
 | Maintenance boot | Real root disk writable, selected from GRUB |
 
-Port 80 is requested but **not implemented**. The save button worked in a temporary RAM-overlay trial; persistent installation remains pending. A reboot removes the trial button installation. It does not remove snapshots already saved on DSPSTORE.
+Port 80 and the save-button service were installed during maintenance on 2 November. Their protected-reboot check remains pending. The new one-button editor integration still requires installation and browser verification; the earlier installed button requires a separate YAML save.
 
 ## Understand the audio path
 
@@ -47,8 +47,8 @@ The root overlay presents a writable filesystem to applications. Its lower layer
 2. Create or edit the filter in **Filters**.
 3. Reference it in a **Filter** step in **Pipeline**, on the correct channel. A filter definition alone does not put it in the audio path.
 4. Apply the configuration and listen at a controlled level. Check output meters and clipping.
-5. Save the configuration to a named YAML file in the GUI, and select that file as active. Button labels may vary with the GUI view; verify the active filename.
-6. Click the optional **Save permanently** button, or run `dsp-save` in a root SSH shell.
+5. Choose a YAML filename in the GUI once if this configuration has no filename. With the updated integration, **Save permanently** writes the current editor to that file and selects it as active before requesting a snapshot. It includes unapplied editor changes; they take effect when DSP restarts.
+6. For the SSH fallback or the older button, first save the YAML and select it as active manually, then run `dsp-save` in a root SSH shell.
 7. Wait for success, then confirm audio resumes. Reboot once after a significant change to check that the intended filter returns.
 
 These actions have different effects:
@@ -58,7 +58,8 @@ These actions have different effects:
 | Apply | Changes the running engine |
 | Save YAML | Writes the configuration file into RAM |
 | Select active file | Chooses the file the snapshot/startup workflow uses |
-| Save permanently / `dsp-save` | Archives the selected file, state and coefficients to DSPSTORE |
+| Updated Save permanently button | Saves editor YAML, selects it as active, then requests a snapshot |
+| SSH `dsp-save` or original button | Archives already-saved files, state and coefficients to DSPSTORE |
 
 Saving pauses audio because the helper stops the GUI and DSP to take a consistent snapshot. It validates the selected configuration, writes an archive and checksum, updates the active pointer, returns the partition to read-only, then restarts DSP and GUI. If saving fails, read the error rather than assuming settings are durable.
 
@@ -155,8 +156,7 @@ A settings backup restores DSP snapshots, not Debian, GRUB or installed applicat
 
 ## Remaining work
 
-- Install the save button permanently in maintenance mode and verify it after reboot.
-- Implement the requested HTTP port 80 change together with the button's origin validation; changing the GUI port alone breaks button requests.
+- Install and browser-test the new one-button editor integration; verify button and port 80 after a protected reboot.
 - Test physically disconnected-network boot and USB/external-device/ADAT clock loss and recovery.
 - Test sustained DSP load and clipping with actual filters.
 - Make an offline disk image before AC-loss/recovery testing.

@@ -15,13 +15,13 @@ Start with [the installation guide](docs/DietPi_CamillaDSP_M93_Install.md). The 
 
 The guide records verified hardware results and remaining acceptance tests. See [TEST_REPORT.md](docs/TEST_REPORT.md) for local checks and their limits. Initial setup uses -30 dB startup gain; the guide explains changing it after commissioning.
 
-Current appliance GUI uses HTTP port 5005. Port 80 is requested but has not been implemented. The GUI save button has been verified in a RAM-overlay trial; persistent installation is pending.
+The appliance GUI was moved to HTTP port 80 during maintenance. The save-button service was installed on disk; protected-reboot verification is pending. The updated one-button YAML-save integration is ready locally but still needs installation and browser verification.
 
 ## How persistence works
 
 Normal boot combines a read-only OS disk with a writable RAM overlay. Programs can write normally, but those OS changes disappear at reboot. DSP presets use a separate, normally read-only partition: `dsp-save` briefly stops audio, validates and archives the selected configuration, then restarts the services.
 
-For a filter change, **apply → save YAML → select active file → save permanently**. For Linux/package changes, boot the writable maintenance entry instead. The GUI's ordinary YAML save and the permanent-save button serve different purposes.
+With the updated GUI integration, choose a YAML filename once, then **Save permanently** saves the current editor to that YAML, selects it as active and snapshots it. For the SSH fallback, use **apply → save YAML → select active file → dsp-save**. For Linux/package changes, boot the writable maintenance entry instead. The GUI's ordinary YAML save and the permanent-save button serve different purposes.
 
 The audio path is external ADAT device ADAT sends → Digiface capture → CamillaDSP → Digiface playback → external ADAT device ADAT returns. The documented topology uses the external ADAT device as clock master at 96 kHz. Listening to a parallel dry path as well as the return can create a hollow or metallic sound.
 

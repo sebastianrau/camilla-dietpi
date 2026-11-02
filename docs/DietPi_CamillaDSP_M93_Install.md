@@ -8,7 +8,7 @@ This revision incorporates the M93 installation and protected-boot fixes verifie
 
 Use this document for a **fresh installation**, in numbered order. Use [Operations](OPERATIONS.md) for daily use of the already installed machine, and [Troubleshooting](TROUBLESHOOTING.md) when a check fails. The [verification report](TEST_REPORT.md) separates local software tests from physical hardware results.
 
-The current appliance is already installed at **192.168.192.50**, with GUI on **port 5005** and startup gain **0 dB**. Port 80 and persistent GUI-button installation are still pending. Do not repeat disk partitioning or the initial application installer on this working system just to update documentation or an optional feature.
+The current appliance is already installed at **192.168.192.50**, with GUI moved to **port 80** and startup gain **0 dB**. The port/save-service installation still needs a protected-reboot check; the new combined YAML-save button needs deployment and browser verification. Fresh installations retain port 5005 unless the optional port-80 installer is used. Do not repeat disk partitioning or the initial application installer on this working system just to update documentation or an optional feature.
 
 ### Know where a command runs
 
@@ -490,7 +490,7 @@ Volume and mute changes affect the running engine immediately. Snapshots include
 
 The setup bundle includes `install-gui-save.sh`, `dsp-save-button.js`, `dsp-save-web.py`, and `dsp-save-web.service`. This is a local extension of the pinned GUI, not an upstream CamillaGUI feature.
 
-**Current appliance status:** the button was installed and tested in the RAM overlay. The user confirmed it works; its status endpoint reported successful snapshot `dsp-20261101-183504-ed93b920.tar.gz` and a read-only settings partition. **Persistent button installation is still pending:** the trial files and enabled unit disappear on reboot, while the saved DSP snapshot remains on DSPSTORE.
+**Current appliance status:** the original permanent-save button worked in a RAM trial, and the button service plus port 80 were installed in a writable maintenance boot on 2 November. A protected reboot still needs verification. The new editor-save bridge described here has passed local tests but still needs deployment and browser verification.
 
 For an optional protected-mode trial, extract the current ZIP and run as root:
 
@@ -507,9 +507,11 @@ sh scripts/install-gui-save.sh
 
 To install the button and also change the GUI to ordinary HTTP port **80**, use `sh scripts/install-gui-save.sh --port80` instead. This updates the installed GUI configuration and adds a systemd capability drop-in so the GUI can bind port 80 while remaining the `dsp` user. It restarts the GUI and save endpoint, but does not initiate a DSP save. Open `http://YOUR_DSP_IP/gui/index.html` afterward. The save endpoint accepts the matching host on HTTP ports 80 and 5005. This option requires maintenance mode; it cannot be combined with `--trial`.
 
-The installer checks for exactly one frontend `build/index.html`, backs it up, inserts an external script, and enables a separate fixed-action save service. It does not run a save. If frontend discovery fails, inspect the installed bundle rather than guessing a path. Reboot normally, check protected mounts, and refresh the browser (hard refresh if needed).
+The installer checks for exactly one frontend `build/index.html`, backs it up, installs the editor bridge and button scripts, and enables a separate fixed-action save service. It does not run a save. If frontend discovery fails, inspect the installed bundle rather than guessing a path. Reboot normally, check protected mounts, and refresh the browser (hard refresh if needed).
 
-The bottom-right **Save permanently** button displays a persistent reminder to save the YAML file in CamillaGUI and select it as active first. Its confirmation dialog repeats that unsaved edits are not included before running the existing `dsp-save`. First save the YAML in the GUI and select it as active. Unsaved editor changes are not included. Audio pauses and startup gain is reapplied exactly as with the SSH command. The button reports success only after `dsp-save` completes. Do not repeatedly click if connection status is uncertain; inspect the service logs.
+The updated bottom-right **Save permanently** button saves the current editor contents into its selected YAML, selects that file as active, then requests the existing `dsp-save`. A new unnamed configuration requires choosing a filename once. There is no need for a separate YAML save on subsequent clicks. The snapshot restart applies that captured configuration, including edits not previously applied. The confirmation explicitly warns that the selected YAML is overwritten and audio briefly pauses.
+
+If saving YAML or selecting the active file fails, no permanent snapshot is requested. Read the displayed error. The older button and direct SSH `dsp-save` still require a manual YAML save first. The bridge targets the pinned CamillaGUI 4.1.0 compiled editor constructor; the installer refuses unknown builds rather than claiming to save stale editor state. It backs up the frontend assets and adds cache-busting URLs. Refresh the page after installation so the matching bridge is loaded.
 
 The save service runs independently of CamillaGUI so stopping the GUI during a snapshot does not kill the save operation. Its API is plain HTTP on port **5006**, alongside GUI port 5005. Both must remain on the trusted LAN without internet forwarding. There is no additional login: LAN GUI users can trigger saves. Browser requests must come from the GUI's matching hostname on HTTP port 80 or 5005; foreign/missing origins and arbitrary command parameters are rejected. This browser-origin check is not authentication against other LAN clients. Duplicate saves are rejected while one is running.
 

@@ -49,3 +49,7 @@ All 14 local tests pass with PyYAML 6.0.3 in an isolated environment, including 
 ## Port-80 preparation — 2 November 2026
 
 All 14 local tests pass, including browser origins on default HTTP port 80, explicit port 80 and original port 5005, with port 81 rejected. The optional save-button installer now supports `--port80`, updates GUI YAML and grants CAP_NET_BIND_SERVICE to the existing dsp-user GUI service. The Lenovo maintenance boot was confirmed writable; installation and reboot verification are pending.
+
+## Combined editor and permanent save — 2 November 2026
+
+All 19 local tests pass. New JavaScript tests execute the bridge with an editor fixture: unsaved content is sent to the YAML-save API before active-file selection; failure at either step is surfaced; no filename performs no writes; the button does not request a snapshot after YAML-save failure. Asset tests verify idempotent constructor patching and rejection of an unknown build. The actual installed 4.1.0 module was inspected for the exact hook. Tests use QuickJS in the development environment; this is not an appliance runtime dependency. Browser use of the deployed combined action and protected reboot remain unverified.

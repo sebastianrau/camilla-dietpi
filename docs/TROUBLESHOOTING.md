@@ -45,7 +45,7 @@ If `systemctl` still fails as root, collect `ps -p 1 -o pid,comm,args` and `syst
 
 ## SSH or the GUI is unreachable
 
-The reserved address is `192.168.192.50`. The current GUI uses **5005**, not 80 or 443. Try the full URL <http://192.168.192.50:5005/gui/index.html>.
+The reserved address is `192.168.192.50`. The installed GUI now uses **80**. Try <http://192.168.192.50/gui/index.html>. Fresh installations default to port 5005 until the optional port change is applied.
 
 At the local console, inspect:
 
@@ -130,7 +130,7 @@ journalctl -u dsp-save-web -b -n 50 --no-pager
 findmnt /srv/dsp-store
 ```
 
-The browser currently needs port 5006 as well as GUI port 5005. The updated endpoint permits GUI HTTP ports 80 and 5005. Other ports require updating origin validation. A network error during a save does not prove it failed: check status before retrying. Use `dsp-save` through SSH if the button is unavailable, and read its final result.
+The browser needs port 5006 as well as the GUI port (80 on this appliance; 5005 on an unchanged fresh installation). The updated endpoint permits GUI HTTP ports 80 and 5005. Other ports require updating origin validation. A network error during a save does not prove it failed: check status before retrying. Use `dsp-save` through SSH if the button is unavailable, and read its final result.
 
 ## Audio does not recover after USB or clock interruption
 
@@ -143,3 +143,7 @@ systemctl restart camilladsp
 ```
 
 This reapplies the startup gain and may interrupt audio. Record the failure conditions; do not treat a manual restart as proof of automatic recovery.
+
+## Combined save reports that the editor integration is unavailable
+
+Refresh the whole page so the patched GUI module and both scripts are loaded. The one-button integration is pinned to the inspected CamillaGUI 4.1.0 build. It does not silently fall back to snapshotting an older YAML if the editor bridge is missing. For a different GUI build, inspect compatibility or use the manual YAML-save plus SSH `dsp-save` workflow. A new configuration must have a filename before the combined button can save it.
