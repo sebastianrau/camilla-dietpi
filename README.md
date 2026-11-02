@@ -15,7 +15,7 @@ Start with [the installation guide](docs/DietPi_CamillaDSP_M93_Install.md). The 
 
 The guide records verified hardware results and remaining acceptance tests. See [TEST_REPORT.md](docs/TEST_REPORT.md) for local checks and their limits. Initial setup uses -30 dB startup gain; the guide explains changing it after commissioning.
 
-The appliance GUI was moved to HTTP port 80 during maintenance. The save-button service was installed on disk; protected-reboot verification is pending. The combined YAML/apply/permanent-save button was installed and saved successfully without audible interruption. Protected-reboot verification remains pending.
+The appliance GUI runs on HTTP port 80. The combined YAML/apply/permanent-save button saved without audible interruption and survived a protected reboot. Remote checks confirmed DSP running at 96 kHz, zero reported clipped samples, RAM overlay enabled, lower disk/settings/EFI mounts read-only and no active swap. USB/clock recovery and sustained-load acceptance tests remain open.
 
 ## How persistence works
 

@@ -61,3 +61,7 @@ Save now stages and validates an immutable RAM copy, detects concurrent file cha
 ## Appliance live-save observation — 2 November 2026
 
 The updated helper and editor integration were installed during writable maintenance mode. The user saved through the button and reported no audible interruption. The status endpoint independently returned success for `dsp-20261102-082824-c26e3ba4.tar.gz`, valid configuration, read-only settings volume and “Audio services were not restarted.” `findmnt` confirmed DSPSTORE ext4 ro. This is one real-appliance save observation; process-PID/volume comparisons, sustained-load testing and protected-reboot verification remain separate checks. Root was still real ext4 rw during this observation, so a normal reboot is needed to restore OS protection.
+
+## Protected reboot verification — 2 November 2026
+
+Remote checks after normal reboot confirmed `/` overlay rw, `/media/root-ro` ext4 ro, `/media/root-rw` tmpfs, DSPSTORE ext4 ro and EFI vfat ro. `/proc/swaps` listed no devices. The GUI was served on port 80 with editor-bridge and combined-save scripts; the independent save endpoint returned Ready. The installed helper contained the live snapshot implementation. DSP ran as dsp with startup gain 0 dB, GUI ran as dsp, and save service ran as root. GUI status reported RUNNING, 96000 capture rate and zero clipped samples at observation. This is not a sustained-load result, nor a systemctl failed-unit audit. A save with the updated helper after this protected reboot has not yet been observed.
