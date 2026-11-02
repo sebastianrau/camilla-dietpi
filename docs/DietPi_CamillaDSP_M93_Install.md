@@ -110,7 +110,7 @@ hostnamectl set-hostname dsp
 ip -br address
 ```
 
-`adduser` asks for the admin password. If that account already exists, inspect `id admin` and skip its creation. Use Ethernet DHCP and reserve the shown address/MAC in your router. No guessed static address is supplied.
+`adduser` asks for the admin password. If that account already exists, inspect `id admin` and skip its creation. Use Ethernet DHCP for initial installation and reserve the shown address/MAC in your router. For optional wireless management after setup, see [Wi-Fi setup](WIFI.md); it requires a detected adapter and a writable maintenance boot. No guessed static address is supplied.
 
 DietPi normally has Dropbear SSH enabled. Keep it for now; OpenSSH is optional. `openssh-client` above also provides the remote `scp` executable. On your host PC test:
 

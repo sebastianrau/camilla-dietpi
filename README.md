@@ -8,6 +8,7 @@ Eight-channel 96 kHz DSP appliance using an RME Digiface USB connected over ADAT
 |---|---|
 | Install a new appliance | [Installation guide](docs/DietPi_CamillaDSP_M93_Install.md) |
 | Use filters, save, back up or enter maintenance | [Operating manual](docs/OPERATIONS.md) |
+| Add Wi-Fi access to an existing network | [Wi-Fi setup](docs/WIFI.md) |
 | Diagnose sound, boot, network or save failures | [Troubleshooting](docs/TROUBLESHOOTING.md) |
 | Understand test evidence and remaining gaps | [Verification report](docs/TEST_REPORT.md) |
 

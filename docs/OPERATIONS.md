@@ -16,6 +16,10 @@ This is the operating manual for the installed Lenovo. For a fresh installation,
 
 Port 80, the combined-save editor bridge and the restart-free snapshot helper survived the protected reboot on 2 November. Before reboot the user confirmed a save without audible interruption. After reboot, the save endpoint was ready, DSP reported RUNNING at 96 kHz with zero clipped samples, and protected mounts were correct. The user subsequently confirmed the combined save also worked without interruption in protected mode.
 
+## Optional Wi-Fi access
+
+To join an existing wireless network, follow [Wi-Fi setup](WIFI.md). The current hardware check found no recognized Wi-Fi adapter; connect and identify a supported adapter first. Configure it during maintenance so credentials survive reboot. Wi-Fi changes management access only; audio remains on USB/ADAT.
+
 ## Understand the audio path
 
 Your DAW or other source sends audio through a compatible external device's ADAT outputs. The external device can be any interface, converter or mixer that meets the channel, rate and clock requirements; no specific brand is required. The Digiface receives it, CamillaDSP processes it, and the Digiface sends it back through ADAT to the external ADAT device's selected analogue outputs.
