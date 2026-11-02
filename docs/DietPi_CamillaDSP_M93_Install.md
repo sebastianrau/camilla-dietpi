@@ -505,11 +505,13 @@ cd /root/dietpi-dsp
 sh scripts/install-gui-save.sh
 ```
 
+To install the button and also change the GUI to ordinary HTTP port **80**, use `sh scripts/install-gui-save.sh --port80` instead. This updates the installed GUI configuration and adds a systemd capability drop-in so the GUI can bind port 80 while remaining the `dsp` user. It restarts the GUI and save endpoint, but does not initiate a DSP save. Open `http://YOUR_DSP_IP/gui/index.html` afterward. The save endpoint accepts the matching host on HTTP ports 80 and 5005. This option requires maintenance mode; it cannot be combined with `--trial`.
+
 The installer checks for exactly one frontend `build/index.html`, backs it up, inserts an external script, and enables a separate fixed-action save service. It does not run a save. If frontend discovery fails, inspect the installed bundle rather than guessing a path. Reboot normally, check protected mounts, and refresh the browser (hard refresh if needed).
 
-The bottom-right **Save permanently** button prompts before running the existing `dsp-save`. First save the YAML in the GUI and select it as active. Unsaved editor changes are not included. Audio pauses and startup gain is reapplied exactly as with the SSH command. The button reports success only after `dsp-save` completes. Do not repeatedly click if connection status is uncertain; inspect the service logs.
+The bottom-right **Save permanently** button displays a persistent reminder to save the YAML file in CamillaGUI and select it as active first. Its confirmation dialog repeats that unsaved edits are not included before running the existing `dsp-save`. First save the YAML in the GUI and select it as active. Unsaved editor changes are not included. Audio pauses and startup gain is reapplied exactly as with the SSH command. The button reports success only after `dsp-save` completes. Do not repeatedly click if connection status is uncertain; inspect the service logs.
 
-The save service runs independently of CamillaGUI so stopping the GUI during a snapshot does not kill the save operation. Its API is plain HTTP on port **5006**, alongside GUI port 5005. Both must remain on the trusted LAN without internet forwarding. There is no additional login: LAN GUI users can trigger saves. Browser requests must come from the GUI's matching hostname on port 5005; foreign/missing origins and arbitrary command parameters are rejected. This browser-origin check is not authentication against other LAN clients. Duplicate saves are rejected while one is running.
+The save service runs independently of CamillaGUI so stopping the GUI during a snapshot does not kill the save operation. Its API is plain HTTP on port **5006**, alongside GUI port 5005. Both must remain on the trusted LAN without internet forwarding. There is no additional login: LAN GUI users can trigger saves. Browser requests must come from the GUI's matching hostname on HTTP port 80 or 5005; foreign/missing origins and arbitrary command parameters are rejected. This browser-origin check is not authentication against other LAN clients. Duplicate saves are rejected while one is running.
 
 Diagnostics:
 

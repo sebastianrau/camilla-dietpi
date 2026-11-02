@@ -45,3 +45,7 @@ Two local tests pass: concurrent saves are rejected and command failures reach s
 Sources now live under `src/`, installers under `scripts/`, units under `systemd/`, configuration under `config/`, browser assets under `web/`, and documentation under `docs/`. Tests resolve sources relative to the repository root.
 
 All 14 local tests pass with PyYAML 6.0.3 in an isolated environment, including snapshot/descriptor tests, HTTP origin checks, and deterministic bundle construction with complete checksum coverage. Shell syntax checks pass for all shell installers and the runtime wrapper. `tools/build_bundle.py` rebuilds the ZIP under `dist/` and its root manifest. These checks do not execute privileged installers on the appliance.
+
+## Port-80 preparation — 2 November 2026
+
+All 14 local tests pass, including browser origins on default HTTP port 80, explicit port 80 and original port 5005, with port 81 rejected. The optional save-button installer now supports `--port80`, updates GUI YAML and grants CAP_NET_BIND_SERVICE to the existing dsp-user GUI service. The Lenovo maintenance boot was confirmed writable; installation and reboot verification are pending.

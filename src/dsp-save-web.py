@@ -46,7 +46,7 @@ class Handler(BaseHTTPRequestHandler):
             target = urlsplit('http://' + self.headers.get('Host', ''))
             # Only the existing GUI on the same host may invoke or inspect saves.
             # Origin is mandatory; cross-site forms, null origins and other ports fail.
-            if (origin.scheme == 'http' and origin.port == 5005
+            if (origin.scheme == 'http' and (origin.port or 80) in (80, 5005)
                     and target.port == 5006 and origin.hostname
                     and origin.hostname == target.hostname
                     and not origin.username and not origin.password

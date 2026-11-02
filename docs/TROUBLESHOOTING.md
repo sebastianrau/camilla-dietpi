@@ -130,7 +130,7 @@ journalctl -u dsp-save-web -b -n 50 --no-pager
 findmnt /srv/dsp-store
 ```
 
-The browser currently needs port 5006 as well as GUI port 5005. Opening the GUI on another port without updating origin validation prevents saves. A network error during a save does not prove it failed: check status before retrying. Use `dsp-save` through SSH if the button is unavailable, and read its final result.
+The browser currently needs port 5006 as well as GUI port 5005. The updated endpoint permits GUI HTTP ports 80 and 5005. Other ports require updating origin validation. A network error during a save does not prove it failed: check status before retrying. Use `dsp-save` through SSH if the button is unavailable, and read its final result.
 
 ## Audio does not recover after USB or clock interruption
 

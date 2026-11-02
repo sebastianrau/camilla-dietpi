@@ -6,11 +6,14 @@
   const button = document.createElement('button');
   button.textContent = 'Save permanently';
   button.style.cssText = 'padding:8px 12px;cursor:pointer';
+  const hint = document.createElement('div');
+  hint.style.cssText = 'margin-top:8px;line-height:1.4';
+  hint.textContent = 'First save the YAML file in CamillaGUI and select it as active. Then click Save permanently. Unsaved edits are not included.';
   const status = document.createElement('div');
   status.setAttribute('role', 'status');
   status.style.cssText = 'margin-top:8px;white-space:pre-wrap;max-height:180px;overflow:auto';
   status.textContent = 'Save the YAML and select it as active first.';
-  panel.append(button, status);
+  panel.append(button, hint, status);
   document.body.append(panel);
   const endpoint = new URL('/save', window.location.href);
   endpoint.port = '5006';
@@ -32,7 +35,7 @@
     }
   }
   button.addEventListener('click', async () => {
-    if (!window.confirm('Save the selected YAML and coefficients permanently? Audio will pause briefly and gain will reset to the configured startup value. Unsaved GUI edits are not included.')) return;
+    if (!window.confirm('Have you saved the YAML file in CamillaGUI and selected it as active? Unsaved edits will NOT be made permanent. Continue to save the selected file and coefficients? Audio will pause briefly and gain will reset to the configured startup value.')) return;
     clearTimeout(timer);
     button.disabled = true;
     status.textContent = 'Requesting permanent save…';

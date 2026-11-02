@@ -56,6 +56,9 @@ class SaveTests(unittest.TestCase):
                 self.assertEqual(request('POST', 'http://dsp.local:5005', '{}')[0], 202)
                 start.assert_called_once()
                 self.assertEqual(request('GET', 'http://dsp.local:5005')[0], 200)
+                self.assertEqual(request('GET', 'http://dsp.local')[0], 200)
+                self.assertEqual(request('GET', 'http://dsp.local:80')[0], 200)
+                self.assertEqual(request('POST', 'http://dsp.local:81', '{}')[0], 403)
         finally:
             server.shutdown()
             server.server_close()
