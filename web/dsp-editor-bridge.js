@@ -13,6 +13,7 @@ window.camillaDspRegisterEditor = (editor) => {
       if (!response.ok || message.trim() !== 'OK') throw new Error(message || `GUI request failed (${response.status})`);
     }
     await post('/api/saveconfigfile', {filename, config});
+    await post('/api/setconfig', {filename, config});
     await post('/api/setactiveconfigfile', {name: filename});
     // Do not mark later edits as saved if the user changed the editor meanwhile.
     if (editor.state.currentConfigFile === filename &&

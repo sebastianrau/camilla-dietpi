@@ -47,7 +47,7 @@ The root overlay presents a writable filesystem to applications. Its lower layer
 2. Create or edit the filter in **Filters**.
 3. Reference it in a **Filter** step in **Pipeline**, on the correct channel. A filter definition alone does not put it in the audio path.
 4. Apply the configuration and listen at a controlled level. Check output meters and clipping.
-5. Choose a YAML filename in the GUI once if this configuration has no filename. With the updated integration, **Save permanently** writes the current editor to that file and selects it as active before requesting a snapshot. It includes unapplied editor changes; they take effect when DSP restarts.
+5. Choose a YAML filename in the GUI once if this configuration has no filename. With the updated integration, **Save permanently** writes the current editor to that file and selects it as active before requesting a snapshot. It includes unapplied editor changes and applies them through the GUI API without restarting the service.
 6. For the SSH fallback or the older button, first save the YAML and select it as active manually, then run `dsp-save` in a root SSH shell.
 7. Wait for success, then confirm audio resumes. Reboot once after a significant change to check that the intended filter returns.
 
@@ -61,13 +61,15 @@ These actions have different effects:
 | Updated Save permanently button | Saves editor YAML, selects it as active, then requests a snapshot |
 | SSH `dsp-save` or original button | Archives already-saved files, state and coefficients to DSPSTORE |
 
-Saving pauses audio because the helper stops the GUI and DSP to take a consistent snapshot. It validates the selected configuration, writes an archive and checksum, updates the active pointer, returns the partition to read-only, then restarts DSP and GUI. If saving fails, read the error rather than assuming settings are durable.
+Saving no longer stops DSP or GUI. The helper copies the archived files into a private RAM directory and compares file hashes before and after copying and validation. If concurrent edits prevent a stable capture, it retries up to three times and reports failure rather than silently saving inconsistent files. It validates the copied selected YAML, then writes only the frozen copy to DSPSTORE with the same checksum and pointer protections as before.
+
+Do not change configuration files or upload coefficients while saving. Staging needs extra RAM roughly proportional to the settings and coefficient files, and compression/validation use CPU. Large FIR collections should be tested under actual load; leaving the process running does not by itself prove zero underruns. Current running state comes from the runtime state file captured with the other files. Main startup gain remains overridden only on a later engine start.
 
 The button's success message means the command completed. Confirm audio and filter behavior separately; a saved valid file does not prove correct routing or acceptable sound.
 
 ## Volume, mute and startup gain
 
-The GUI volume changes the running DSP immediately. Every DSP start overrides main gain using `STARTUP_GAIN_DB` in `/etc/default/camilladsp-hardware`. Therefore a permanent save, service restart or reboot resets the main volume to that configured value. Saved mute state is retained, so the DSP can return muted.
+The GUI volume changes the running DSP immediately. Saving now leaves that volume unchanged. Every DSP start overrides main gain using `STARTUP_GAIN_DB` in `/etc/default/camilladsp-hardware`. A service restart or reboot resets main volume to that configured value; the updated save action does not. Saved mute state is retained, so the DSP can return muted.
 
 This appliance was changed from commissioning gain −30 dB to 0 dB. That is a 30 dB increase. A filter with positive gain can still clip at 0 dB main gain; use meters and suitable headroom rather than assuming 0 dB is always clean.
 

@@ -49,7 +49,7 @@ This guide's topology carries eight channels each way at 96 kHz over four optica
 | OS protection | `overlayroot`, writable upper layer in RAM |
 | Saved DSP settings | Separate 1 GiB ext4 partition, normally read-only |
 | Runtime DSP settings | `/run/camilladsp`, in RAM |
-| Permanent DSP save | `sudo dsp-save`; briefly interrupts audio |
+| Permanent DSP save | `sudo dsp-save`; frozen-copy save without service restart |
 | OS/app changes | One writable maintenance boot, then normal reboot |
 
 Normal operation is intended to tolerate loss of mains. **Keep power on during installation, partitioning, saves, firmware work and updates.** BIOS “Power On after AC loss” starts the PC; the services start DSP automatically. There is no hardware bypass or speaker-protection limiter in this procedure.
@@ -482,9 +482,11 @@ Then make a small identifiable change in the GUI, **save its YAML file, select t
 5. In SSH run `sudo dsp-save` (or `dsp-save` inside a root shell).
 6. Wait for completion and check that DSP has resumed and `/srv/dsp-store` is `ro`.
 
-`dsp-save` stops GUI and DSP briefly, validates the selected file, writes a versioned archive and checksum, switches the active pointer, remounts read-only and restarts the services. A failure reports an error and attempts cleanup. It **does not** commit OS changes, application files or arbitrary RAM contents. It requires the supplied settings-restore unit and both application services to be active; fix a failed service before saving normally.
+`dsp-save` now leaves GUI and DSP running. It hashes the runtime settings, copies them to a private RAM directory, compares source/copy fingerprints and validates the copied selected file. It retries a changing capture up to three times. Only after stable capture does it remount DSPSTORE writable, archive the frozen copy, write its checksum and active pointer, and return the store to read-only. A failed capture does not change the durable active pointer. Avoid editing/uploading during a save. Staging large coefficients needs additional RAM and uses CPU; verify actual DSP load for underruns.
 
-Volume and mute changes affect the running engine immediately. Snapshots include fader/mute state. On startup **main gain is deliberately overridden by `STARTUP_GAIN_DB=-30`**, while saved mute state is retained: if you saved muted, it can boot muted. `dsp-save` restarts the engine, so it also resets main volume to the fixed startup gain. To use 0 dB permanently, mute monitors, boot maintenance mode, confirm real root is writable, and edit `/etc/default/camilladsp-hardware` to set `STARTUP_GAIN_DB=0`. Reboot normally and verify gain. This is a 30 dB increase from commissioning gain; check gain structure and clipping. Fresh configurations deliberately retain the safer -30 dB commissioning default.
+The command saves already-written YAML and runtime state, not unsaved browser edits or OS changes. The updated GUI button writes/applies the editor first. The helper still expects the restore unit, DSP and GUI services active. Older installed helpers may restart audio until upgraded with `sh scripts/update-live-save.sh` in maintenance mode (or `--trial` for an overlay-only test).
+
+Volume and mute changes affect the running engine immediately. Snapshots include fader/mute state. On startup **main gain is deliberately overridden by `STARTUP_GAIN_DB=-30`**, while saved mute state is retained: if you saved muted, it can boot muted. The updated `dsp-save` does not restart the engine or reset main gain. Older helper versions did; update the installed helper as well as the browser scripts. To use 0 dB permanently, mute monitors, boot maintenance mode, confirm real root is writable, and edit `/etc/default/camilladsp-hardware` to set `STARTUP_GAIN_DB=0`. Reboot normally and verify gain. This is a 30 dB increase from commissioning gain; check gain structure and clipping. Fresh configurations deliberately retain the safer -30 dB commissioning default.
 
 ### Optional: Save permanently button in CamillaGUI
 
@@ -509,11 +511,11 @@ To install the button and also change the GUI to ordinary HTTP port **80**, use 
 
 The installer checks for exactly one frontend `build/index.html`, backs it up, installs the editor bridge and button scripts, and enables a separate fixed-action save service. It does not run a save. If frontend discovery fails, inspect the installed bundle rather than guessing a path. Reboot normally, check protected mounts, and refresh the browser (hard refresh if needed).
 
-The updated bottom-right **Save permanently** button saves the current editor contents into its selected YAML, selects that file as active, then requests the existing `dsp-save`. A new unnamed configuration requires choosing a filename once. There is no need for a separate YAML save on subsequent clicks. The snapshot restart applies that captured configuration, including edits not previously applied. The confirmation explicitly warns that the selected YAML is overwritten and audio briefly pauses.
+The updated bottom-right **Save permanently** button saves the current editor contents into its selected YAML, selects that file as active, then requests the existing `dsp-save`. A new unnamed configuration requires choosing a filename once. There is no need for a separate YAML save on subsequent clicks. The updated button applies the captured configuration through the GUI API before snapshotting, including edits not previously applied. The confirmation warns that the selected YAML is overwritten and applied. Saving does not restart audio services; hardware or sample-rate changes can still interrupt audio when applied.
 
 If saving YAML or selecting the active file fails, no permanent snapshot is requested. Read the displayed error. The older button and direct SSH `dsp-save` still require a manual YAML save first. The bridge targets the pinned CamillaGUI 4.1.0 compiled editor constructor; the installer refuses unknown builds rather than claiming to save stale editor state. It backs up the frontend assets and adds cache-busting URLs. Refresh the page after installation so the matching bridge is loaded.
 
-The save service runs independently of CamillaGUI so stopping the GUI during a snapshot does not kill the save operation. Its API is plain HTTP on port **5006**, alongside GUI port 5005. Both must remain on the trusted LAN without internet forwarding. There is no additional login: LAN GUI users can trigger saves. Browser requests must come from the GUI's matching hostname on HTTP port 80 or 5005; foreign/missing origins and arbitrary command parameters are rejected. This browser-origin check is not authentication against other LAN clients. Duplicate saves are rejected while one is running.
+The save service runs independently of CamillaGUI. The updated snapshot helper keeps GUI and DSP running throughout the save. Its API is plain HTTP on port **5006**, alongside GUI port 5005. Both must remain on the trusted LAN without internet forwarding. There is no additional login: LAN GUI users can trigger saves. Browser requests must come from the GUI's matching hostname on HTTP port 80 or 5005; foreign/missing origins and arbitrary command parameters are rejected. This browser-origin check is not authentication against other LAN clients. Duplicate saves are rejected while one is running.
 
 Diagnostics:
 

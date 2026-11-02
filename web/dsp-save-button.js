@@ -8,7 +8,7 @@
   button.style.cssText = 'padding:8px 12px;cursor:pointer';
   const hint = document.createElement('div');
   hint.style.cssText = 'margin-top:8px;line-height:1.4';
-  hint.textContent = 'Saves the current editor to its selected YAML, then makes it permanent. Choose a filename once for a new configuration.';
+  hint.textContent = 'Saves and applies the current editor YAML, then makes it permanent without restarting audio services. Choose a filename once for a new configuration.';
   const status = document.createElement('div');
   status.setAttribute('role', 'status');
   status.style.cssText = 'margin-top:8px;white-space:pre-wrap;max-height:180px;overflow:auto';
@@ -25,7 +25,7 @@
       const result = await response.json();
       button.disabled = result.running;
       status.textContent = result.running ? result.message :
-        result.ok === true ? 'Saved permanently. Audio and GUI restarted.' :
+        result.ok === true ? 'Saved permanently. Audio services kept running.' :
         result.ok === false ? `Save failed: ${result.message}` : 'Ready to save editor YAML and make it permanent.';
       if (result.running) timer = setTimeout(poll, 1000);
     } catch (error) {
@@ -35,7 +35,7 @@
     }
   }
   button.addEventListener('click', async () => {
-    if (!window.confirm('Save the current editor contents to the selected YAML and make them permanent? This overwrites that YAML and applies these settings when DSP restarts. Audio will pause briefly; gain resets to the configured startup value.')) return;
+    if (!window.confirm('Save the current editor contents to the selected YAML and make them permanent? This overwrites that YAML, applies the configuration and saves a snapshot without restarting audio services. Changes to devices or sample rate can still interrupt audio.')) return;
     clearTimeout(timer);
     button.disabled = true;
     status.textContent = 'Saving editor to YAML…';

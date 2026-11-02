@@ -38,13 +38,13 @@ class EditorSaveTests(unittest.TestCase):
     def test_saves_unsaved_editor_then_selects_active(self):
         ctx = self.context()
         calls = json.loads(ctx.eval('JSON.stringify(calls)'))
-        self.assertEqual([c['path'] for c in calls], ['/api/saveconfigfile', '/api/setactiveconfigfile'])
+        self.assertEqual([c['path'] for c in calls], ['/api/saveconfigfile', '/api/setconfig', '/api/setactiveconfigfile'])
         self.assertEqual(calls[0]['body']['config']['filters']['unsaved']['gain'], -6)
         self.assertEqual(ctx.eval('outcome'), 'test.yml')
         self.assertFalse(ctx.eval('editor.state.unsavedChanges'))
 
     def test_failure_stops_sequence_and_preserves_dirty_state(self):
-        for failed, count in [('/api/saveconfigfile', 1), ('/api/setactiveconfigfile', 2)]:
+        for failed, count in [('/api/saveconfigfile', 1), ('/api/setconfig', 2), ('/api/setactiveconfigfile', 3)]:
             ctx = self.context(fail=failed)
             self.assertTrue(ctx.eval('outcome').startswith('ERROR:'))
             self.assertEqual(ctx.eval('calls.length'), count)

@@ -9,7 +9,7 @@ User=root
 Restart=on-failure
 RestartSec=3
 UMask=0077
-# Runs outside camillagui.service: dsp-save stops and restarts that unit.
+# Fixed-action helper runs independently of the GUI; saves leave audio services running.
 
 [Install]
 WantedBy=multi-user.target

@@ -53,3 +53,7 @@ All 14 local tests pass, including browser origins on default HTTP port 80, expl
 ## Combined editor and permanent save — 2 November 2026
 
 All 19 local tests pass. New JavaScript tests execute the bridge with an editor fixture: unsaved content is sent to the YAML-save API before active-file selection; failure at either step is surfaced; no filename performs no writes; the button does not request a snapshot after YAML-save failure. Asset tests verify idempotent constructor patching and rejection of an unknown build. The actual installed 4.1.0 module was inspected for the exact hook. Tests use QuickJS in the development environment; this is not an appliance runtime dependency. Browser use of the deployed combined action and protected reboot remain unverified.
+
+## Restart-free save implementation — 2 November 2026
+
+Save now stages and validates an immutable RAM copy, detects concurrent file changes, and writes the snapshot without stop/start calls. Tests check no service mutations on success or failure, source edits after staging do not alter the archive, and continuously changing settings fail before remounting the store writable. Editor tests now require save-YAML, apply-config, select-active ordering, with every failed step blocking the snapshot request. Real-appliance no-restart/PID, volume retention and under-load audio verification remain pending.

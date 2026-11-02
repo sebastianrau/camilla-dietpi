@@ -40,7 +40,7 @@ def install_assets(root, source):
     # Replace the original button tag, or append both on first installation.
     for name in ('dsp-editor-bridge.js', 'dsp-save-button.js'):
         text = re.sub(r'<script src="' + re.escape(name) + r'(?:\?[^" ]*)?"></script>', '', text)
-    tags = '<script src="dsp-editor-bridge.js?v=1"></script><script src="dsp-save-button.js?v=2"></script>'
+    tags = '<script src="dsp-editor-bridge.js?v=2"></script><script src="dsp-save-button.js?v=3"></script>'
     index.write_text(text.replace('</body>', tags + '</body>'))
     return index
 

@@ -58,10 +58,34 @@ class SnapshotTests(unittest.TestCase):
         m.save()
         self.assertNotEqual(m.checked_archive(), first)
         self.assertTrue(first.exists())
-        self.assertEqual(self.calls[-3:], [
-            ('mount', '-o', 'remount,ro', str(self.store)),
-            ('systemctl', 'start', 'camilladsp.service'),
-            ('systemctl', 'start', 'camillagui.service')])
+        self.assertEqual(self.calls[-1], ('mount', '-o', 'remount,ro', str(self.store)))
+        self.assertFalse(any(call[0] == 'systemctl' for call in self.calls))
+
+    def test_live_archive_uses_frozen_copy_without_service_mutations(self):
+        original = m.write_snapshot
+        def changed_after_capture(source):
+            (self.runtime / 'configs/test.yml').write_text('test: later edit\n')
+            return original(source)
+        with patch.object(m, 'write_snapshot', side_effect=changed_after_capture):
+            m.save()
+        with tarfile.open(m.checked_archive()) as archive:
+            self.assertEqual(archive.extractfile('configs/test.yml').read(), b'test: initial\n')
+        self.assertFalse(any(c[0] == 'systemctl' for c in self.calls))
+
+    def test_changing_runtime_rejected_before_store_is_writable(self):
+        original = m.runtime_fingerprint
+        counter = [0]
+        def fingerprint(root):
+            result = original(root)
+            if root == self.runtime:
+                counter[0] += 1
+                result['changing'] = counter[0]
+            return result
+        with patch.object(m, 'runtime_fingerprint', side_effect=fingerprint):
+            with self.assertRaisesRegex(RuntimeError, 'changed'):
+                m.save()
+        self.assertFalse(any(c[0] in ('mount', 'systemctl') for c in self.calls))
+        self.assertFalse((self.store / 'active.json').exists())
 
     def test_corruption_rejected(self):
         m.save(initial=True)
@@ -77,10 +101,8 @@ class SnapshotTests(unittest.TestCase):
             with self.assertRaisesRegex(OSError, 'disk full'):
                 m.save()
         self.assertEqual((self.store / 'active.json').read_bytes(), pointer)
-        self.assertEqual(self.calls[-3:], [
-            ('mount', '-o', 'remount,ro', str(self.store)),
-            ('systemctl', 'start', 'camilladsp.service'),
-            ('systemctl', 'start', 'camillagui.service')])
+        self.assertEqual(self.calls[-1], ('mount', '-o', 'remount,ro', str(self.store)))
+        self.assertFalse(any(call[0] == 'systemctl' for call in self.calls))
 
     def test_unsafe_tar_rejected_before_extraction(self):
         for name, kind in [('../escape', tarfile.REGTYPE),

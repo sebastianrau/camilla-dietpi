@@ -19,7 +19,7 @@ The appliance GUI was moved to HTTP port 80 during maintenance. The save-button 
 
 ## How persistence works
 
-Normal boot combines a read-only OS disk with a writable RAM overlay. Programs can write normally, but those OS changes disappear at reboot. DSP presets use a separate, normally read-only partition: `dsp-save` briefly stops audio, validates and archives the selected configuration, then restarts the services.
+Normal boot combines a read-only OS disk with a writable RAM overlay. Programs can write normally, but those OS changes disappear at reboot. DSP presets use a separate, normally read-only partition: `dsp-save` validates a stable RAM copy and archives the selected configuration while DSP and GUI continue running.
 
 With the updated GUI integration, choose a YAML filename once, then **Save permanently** saves the current editor to that YAML, selects it as active and snapshots it. For the SSH fallback, use **apply → save YAML → select active file → dsp-save**. For Linux/package changes, boot the writable maintenance entry instead. The GUI's ordinary YAML save and the permanent-save button serve different purposes.
 

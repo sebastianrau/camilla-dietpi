@@ -31,7 +31,7 @@ Expected: current source `Input 1`, rate `96000`, and both input controls at enu
 
 ## Volume resets when saving
 
-`dsp-save` restarts the engine. The startup wrapper reapplies the configured gain, currently 0 dB on this appliance. GUI volume is not the permanent startup-gain setting. This behavior and the maintenance procedure are explained in [Operations](OPERATIONS.md#volume-mute-and-startup-gain).
+The updated helper leaves DSP and volume running unchanged. If saving still restarts audio, the older helper may remain installed: upgrade both `/usr/local/sbin/dsp-state` and the GUI integration with `scripts/update-live-save.sh`, then refresh the browser. A normal service restart or reboot still reapplies the configured startup gain. See [Operations](OPERATIONS.md#volume-mute-and-startup-gain).
 
 ## Permission denied, or systemctl cannot reach the system bus
 

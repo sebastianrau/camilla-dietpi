@@ -16,7 +16,7 @@ class SaveState:
         with self.lock:
             if self.result['running']:
                 return False
-            self.result = {'running': True, 'ok': None, 'message': 'Saving; audio and GUI will restart…'}
+            self.result = {'running': True, 'ok': None, 'message': 'Saving snapshot; audio services stay running…'}
         threading.Thread(target=self.save, daemon=True).start()
         return True
 
